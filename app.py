@@ -1,10 +1,9 @@
 """Run with: streamlit run app.py"""
 import os
-from pathlib import Path
 import streamlit as st
 from escape_room.engine import ROOM, new_state, public_state
 from escape_room.game import v1_turn, v2_turn
-from escape_room.llm import Gemini, ModelError
+from escape_room.llm import Gemini, ModelError, DEFAULT_MODEL
 
 st.set_page_config(page_title='The Last Library | AI Escape Room', page_icon='🗝️', layout='centered')
 st.markdown('''<style>
@@ -21,10 +20,18 @@ with st.sidebar:
     api_key = st.text_input('Gemini API key', type='password',
                             help='Stored only in this session; never saved in project files.') if live else ''
     api_key = api_key or os.environ.get('GEMINI_API_KEY', '')
-    model_id = st.text_input('Gemini model ID', value=os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash-lite')) if live else ''
+    model_id = st.text_input('Gemini model ID', value=os.environ.get('GEMINI_MODEL', DEFAULT_MODEL)) if live else ''
     if live:
         st.caption('Your messages are sent to Google. Use an API key and model eligible for the free tier. No automatic paid fallback.')
         st.link_button('Get a key in Google AI Studio', 'https://aistudio.google.com/apikey')
+        if st.button('Test Gemini connection', disabled=not api_key):
+            try:
+                with st.spinner('Checking Gemini…'):
+                    Gemini(api_key.strip(), model_id.strip()).generate(
+                        'Reply with the word Connected.', [{'role': 'user', 'content': 'Connection check.'}])
+                st.success('Gemini connection verified for this key and model.')
+            except ModelError as error:
+                st.error(str(error))
     else:
         st.caption('Offline demo uses exact commands and authored responses. It makes no AI requests.')
     restart = st.button('Restart this version', use_container_width=True)
@@ -82,7 +89,7 @@ if prompt:
     game['warning'] = ''
     try:
         if live:
-            model = Gemini(api_key, model_id)
+            model = Gemini(api_key.strip(), model_id.strip())
         with st.spinner('The library stirs…'):
             if is_v2:
                 reply, game['warning'] = v2_turn(game['state'], game['history'], prompt, model)

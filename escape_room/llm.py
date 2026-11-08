@@ -5,6 +5,9 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 
+DEFAULT_MODEL = 'gemini-3.5-flash-lite'
+
+
 class ModelError(Exception):
     pass
 
@@ -12,7 +15,7 @@ class ModelError(Exception):
 class Gemini:
     def __init__(self, api_key, model):
         if not re.fullmatch(r'[a-zA-Z0-9._-]{1,100}', model):
-            raise ModelError('Use a model ID such as gemini-2.5-flash-lite.')
+            raise ModelError('Use a model ID such as gemini-3.5-flash-lite.')
         self.api_key = api_key
         self.model = model
 
@@ -41,11 +44,23 @@ class Gemini:
                 raise ModelError('The model returned no answer. Try again.')
             return text
         except HTTPError as error:
+            reason = ''
+            try:
+                body = error.read(20_000) if error.fp is not None else b'{}'
+                details = json.loads(body).get('error', {}).get('details', [])
+                if any(isinstance(d, dict) and d.get('reason') == 'API_KEY_INVALID' for d in details):
+                    reason = 'The API key is invalid. Create or copy a Gemini API key in AI Studio.'
+            except (ValueError, AttributeError, TypeError, OSError):
+                pass
             messages = {400: 'The model rejected this request. Check the model ID.',
                         401: 'The API key was not accepted.', 403: 'The API key lacks access.',
                         404: 'This model was not found. Check the model ID in AI Studio.',
-                        429: 'The free quota or rate limit was reached. Wait or use offline demo.'}
-            raise ModelError(messages.get(error.code, 'Gemini is unavailable. Try again later.')) from None
+                        429: 'The free quota or rate limit was reached. Wait or use offline demo.',
+                        500: 'Google reported an internal error. Retry shortly.',
+                        502: 'The API gateway could not reach Gemini. Retry shortly.',
+                        503: 'Gemini is overloaded or temporarily unavailable. Retry shortly.',
+                        504: 'The Gemini request timed out upstream. Retry shortly.'}
+            raise ModelError(f'Gemini HTTP {error.code}: ' + (reason or messages.get(error.code, 'Unexpected API response. Check model access in AI Studio.'))) from None
         except (URLError, TimeoutError, OSError):
             raise ModelError('Could not reach Gemini. Check your connection or use offline demo.') from None
         except (ValueError, KeyError, IndexError, TypeError):
