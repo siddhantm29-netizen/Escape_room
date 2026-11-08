@@ -1,0 +1,10 @@
+{
+  "title": "The Last Library",
+  "intro": "Rain taps against the library windows. You wake beside a desk, with no memory of arriving. A bookshelf, a painting and a locked drawer are nearby. The exit has a four-digit keypad. Explore, collect clues and find your way out.",
+  "objects": ["desk", "bookshelf", "painting", "drawer", "door"],
+  "riddle": "I have a spine but no bones, and leaves but no branches. What am I?",
+  "riddle_answers": ["book", "a book", "books"],
+  "book_numbers": {"oak": "7", "moon": "3", "star": "1", "sun": "9"},
+  "order": ["oak", "moon", "star", "sun"],
+  "door_code": "7319"
+}
