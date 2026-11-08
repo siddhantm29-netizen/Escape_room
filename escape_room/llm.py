@@ -1,5 +1,6 @@
 """Small Gemini REST client; API credentials never enter a URL or prompt."""
 import json
+from http.client import HTTPException
 import re
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -13,14 +14,15 @@ class ModelError(Exception):
 
 
 class Gemini:
-    def __init__(self, api_key, model):
+    def __init__(self, api_key, model, temperature=0.2):
         if not re.fullmatch(r'[a-zA-Z0-9._-]{1,100}', model):
             raise ModelError('Use a model ID such as gemini-3.5-flash-lite.')
         self.api_key = api_key
         self.model = model
+        self.temperature = temperature
 
     def generate(self, system, messages, json_mode=False):
-        config = {'temperature': 0.2, 'maxOutputTokens': 1024}
+        config = {'temperature': self.temperature, 'maxOutputTokens': 1024}
         if json_mode:
             config['responseMimeType'] = 'application/json'
         payload = {'systemInstruction': {'parts': [{'text': system}]},
@@ -50,7 +52,7 @@ class Gemini:
                 details = json.loads(body).get('error', {}).get('details', [])
                 if any(isinstance(d, dict) and d.get('reason') == 'API_KEY_INVALID' for d in details):
                     reason = 'The API key is invalid. Create or copy a Gemini API key in AI Studio.'
-            except (ValueError, AttributeError, TypeError, OSError):
+            except (ValueError, AttributeError, TypeError, OSError, HTTPException):
                 pass
             messages = {400: 'The model rejected this request. Check the model ID.',
                         401: 'The API key was not accepted.', 403: 'The API key lacks access.',
@@ -61,7 +63,7 @@ class Gemini:
                         503: 'Gemini is overloaded or temporarily unavailable. Retry shortly.',
                         504: 'The Gemini request timed out upstream. Retry shortly.'}
             raise ModelError(f'Gemini HTTP {error.code}: ' + (reason or messages.get(error.code, 'Unexpected API response. Check model access in AI Studio.'))) from None
-        except (URLError, TimeoutError, OSError):
+        except (URLError, TimeoutError, OSError, HTTPException):
             raise ModelError('Could not reach Gemini. Check your connection or use offline demo.') from None
-        except (ValueError, KeyError, IndexError, TypeError):
+        except (ValueError, KeyError, IndexError, TypeError, AttributeError):
             raise ModelError('Gemini returned an unreadable or blocked answer. Try again.') from None

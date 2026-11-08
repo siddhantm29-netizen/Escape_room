@@ -58,10 +58,12 @@ def v2_turn(state, history, prompt, model=None):
         # Parser sees only conversation for reference, never room solutions or writable state.
         context = history[-6:] + [{'role': 'user', 'content': prompt}]
         action = json.loads(model.generate(PARSER_PROMPT, context, json_mode=True))
-        if isinstance(action, dict) and action.get('kind') in {'solve', 'unlock'}:
+        if isinstance(action, dict) and (action.get('kind') in ('solve', 'unlock')
+                or (action.get('kind') == 'open' and action.get('target') == 'door')):
             value = action.get('value')
             # Reject a model-invented answer/code, even when its schema is valid.
-            if not isinstance(value, str) or not value.strip() or value.lower() not in prompt.lower():
+            if not isinstance(value, str) or not value.strip() or not re.search(
+                    r'(?<!\w)' + re.escape(value.strip()) + r'(?!\w)', prompt, re.IGNORECASE):
                 return result(False, 'State unchanged: enter your own answer or code explicitly.')['options'][0], ''
         event = apply_action(state, action)
         if not isinstance(action, dict) or set(action) != {'kind', 'target', 'value'}:

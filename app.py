@@ -18,13 +18,18 @@ with st.sidebar:
     version = st.radio('Game version', ['Version 2 · Validated', 'Version 1 · Conversational'])
     live = st.toggle('Use Gemini', value=False)
     api_key = st.text_input('Gemini API key', type='password',
-                            help='Stored only in this session; never saved in project files.') if live else ''
-    api_key = api_key or os.environ.get('GEMINI_API_KEY', '')
+                            key='gemini_api_key', max_chars=200, autocomplete='off',
+                            help='Kept only in this session. Refresh or Clear API key to stop using it.') if live else ''
+    api_key = api_key.strip()
+    if live:
+        st.button('Clear API key', key='clear_api_key',
+                  on_click=lambda: st.session_state.update(gemini_api_key=''))
+        st.caption('Your key is used only in this session. Refreshing starts without a key.')
     model_id = st.text_input('Gemini model ID', value=os.environ.get('GEMINI_MODEL', DEFAULT_MODEL)) if live else ''
     if live:
         st.caption('Your messages are sent to Google. Use an API key and model eligible for the free tier. No automatic paid fallback.')
         st.link_button('Get a key in Google AI Studio', 'https://aistudio.google.com/apikey')
-        if st.button('Test Gemini connection', disabled=not api_key):
+        if st.button('Test Gemini connection', key='test_connection', disabled=not api_key):
             try:
                 with st.spinner('Checking Gemini…'):
                     Gemini(api_key.strip(), model_id.strip()).generate(
@@ -34,7 +39,7 @@ with st.sidebar:
                 st.error(str(error))
     else:
         st.caption('Offline demo uses exact commands and authored responses. It makes no AI requests.')
-    restart = st.button('Restart this version', use_container_width=True)
+    restart = st.button('Restart this version', key='restart_game', use_container_width=True)
     with st.expander('How to play', expanded=True):
         st.write('Explore five objects, solve the desk riddle, collect what you find, and combine the clues to unlock the exit.')
         st.write('With Gemini, describe one action in your own words. For example: “Look closely at the writing desk.”')
@@ -53,7 +58,7 @@ game = st.session_state.games[slot]
 st.caption('THE LAST LIBRARY / AN INTERACTIVE MYSTERY')
 st.title('One room. A way out.')
 st.write('Follow the clues through a forgotten library. Every discovery brings the exit closer.')
-st.caption(f'{version}  •  ' + ('Gemini connected on request' if live else 'Offline demo'))
+st.caption(f'{version}  •  ' + ('Gemini · live API' if live else 'Offline demo'))
 
 if is_v2:
     state = game['state']
@@ -89,7 +94,7 @@ if prompt:
     game['warning'] = ''
     try:
         if live:
-            model = Gemini(api_key.strip(), model_id.strip())
+            model = Gemini(api_key, model_id.strip(), temperature=0.0 if is_v2 else 0.2)
         with st.spinner('The library stirs…'):
             if is_v2:
                 reply, game['warning'] = v2_turn(game['state'], game['history'], prompt, model)
@@ -104,4 +109,5 @@ if is_v2:
     with st.expander('Session state · for the assignment demo'):
         st.json(public_state(game['state']))
 st.divider()
-st.caption('Built with Python, Streamlit and Gemini. Offline mode is a deterministic demonstration; live AI play requires your own API key.')
+st.caption('Built with Python, Streamlit and Gemini. Offline mode uses authored responses; AI mode requires your own API key.')
+st.caption('Privacy & API use: Your key is held only in this session’s memory. This app does not save it to cookies, browser storage, files or a database, and does not share it with other players. Refreshing starts a new session without a key; Clear API key stops further requests with it. In AI mode, your messages and key are sent over HTTPS to Google to process the request. Google’s data terms, quota limits and any billing on your account apply. Do not enter sensitive personal information. Game progress is temporary and can reset when the session ends. Browser password managers are controlled by your browser, not this app.')
