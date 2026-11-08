@@ -18,7 +18,7 @@ python -m pip install -r requirements.txt
 python -m streamlit run app.py
 ```
 
-The default **Version 2 offline demo** works without a key. Use the exact commands in the sidebar. For natural-language AI play, enable **Use Gemini**, enter your own API key and select a model available to your account. Click **Test Gemini connection**, then choose Version 1 or Version 2. The connection check makes one short API request. Never commit an API key.
+The default **Version 2 offline demo** works without a key. Use the commands in the sidebar. Typing an object name alone, such as `drawer`, examines it in both offline and AI mode. For natural-language AI play, enable **Use Gemini**, enter your own API key and select a model available to your account. Click **Test Gemini connection**, then choose Version 1 or Version 2. The connection check makes one short API request. Never commit an API key.
 
 The default model is `gemini-3.5-flash-lite`. Google lists standard text generation for this model on its [free tier](https://ai.google.dev/gemini-api/docs/pricing). Availability and quotas depend on your account; use a free-tier project without paid billing for this assignment. The application never switches to a different model or purchases capacity automatically. An enabled billing account can still incur provider charges: the app cannot enforce Google's billing settings.
 
@@ -88,9 +88,13 @@ See the [deployment-readiness audit](docs/AUDIT.md) for reproduced bugs, privacy
 python -m unittest discover -s tests -v
 ```
 
-42 tests cover the full solution, invalid actions, inventory, repeated actions, parser/narrator failures, API transport, restart and version isolation. Streamlit AppTest runs without a browser or API key. The app was also opened in a browser and an object examination was verified visually.
+60 tests cover the full solution, invalid actions, inventory, repeated actions, parser/narrator failures, API transport, restart and version isolation. Streamlit AppTest runs without a browser or API key. The app was also opened in a browser and an object examination was verified visually.
 
 **Evidence limit:** API transport tests use mocked HTTP responses. V1 limitation tests use controlled model-output fixtures. They demonstrate that V1 accepts bad model behavior while V2 rejects invalid transitions; they are not evidence that Gemini produced those outputs. The user confirmed a successful live connection check with their own key after the model update. Full live gameplay and adversarial trials are pending. Run the manual protocol in `docs/TEST_CASES.md` before presenting live AI results.
+
+## Diagnostic logs
+
+The bottom-of-page diagnostic panel offers a sanitized session-log download and a link to automatically saved GitHub logs. To enable automatic saving, add a repository-scoped `GITHUB_LOG_TOKEN` privately in Streamlit Secrets. Each event is saved under `logs/` on the separate `app-logs` branch, so logging does not redeploy the game. Keys, chat text and puzzle answers are excluded. See [setup, retention and troubleshooting](docs/LOGGING.md).
 
 ## Project structure
 

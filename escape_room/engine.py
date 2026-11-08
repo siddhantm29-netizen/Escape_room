@@ -50,6 +50,8 @@ def apply_action(state, action):
         else:
             text = 'Separate identity from position. A mark in the room need not occupy the same place in a sequence.'
         return result(True, text)
+    if kind == 'unknown':
+        return result(False, 'Please describe one action, such as examine drawer, open drawer, inventory or hint.')
     if target not in ROOM['objects'] + ['key']:
         return result(False, 'That object is not available. Explore the desk, bookshelf, painting, drawer or door.')
     if kind == 'examine':

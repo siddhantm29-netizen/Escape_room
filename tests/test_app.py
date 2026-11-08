@@ -7,6 +7,7 @@ from streamlit.testing.v1 import AppTest
 APP = str(Path(__file__).resolve().parents[1] / 'app.py')
 
 
+@patch.dict('os.environ', {'GITHUB_LOG_TOKEN': ''})
 class AppTests(unittest.TestCase):
     def test_complete_offline_game_restart_and_version_isolation(self):
         app = AppTest.from_file(APP).run()
@@ -105,3 +106,43 @@ class AppTests(unittest.TestCase):
         self.assertEqual(app.sidebar.text_input(key='gemini_api_key').value, '')
         self.assertTrue(app.chat_input[0].disabled)
         self.assertIn('desk', app.session_state['games']['v2']['state']['discovered'])
+
+    def test_session_log_explains_drawer_rejection_without_chat_or_key(self):
+        app = AppTest.from_file(APP).run()
+        app.chat_input[0].set_value('drawer').run()
+        self.assertFalse(app.exception)
+        event = app.session_state['diagnostic_events'][-1]
+        self.assertEqual(event['target'], 'drawer')
+        self.assertEqual(event['action_kind'], 'examine')
+        self.assertEqual(event['outcome'], 'rejected')
+        self.assertNotIn('content', event)
+        self.assertNotIn('api_key', event)
+
+
+    def test_existing_session_gets_new_log_defaults(self):
+        app = AppTest.from_file(APP)
+        app.session_state['diagnostic_events'] = []
+        app.run()
+        self.assertFalse(app.exception)
+        self.assertEqual(app.session_state['pending_github_logs'], [])
+
+    @patch('escape_room.github_logs.ensure_log_branch')
+    @patch('escape_room.github_logs.save_log', return_value='saved-sha')
+    def test_automatic_log_saving_and_retry_never_break_game(self, save, branch):
+        with patch.dict('os.environ', {'GITHUB_LOG_TOKEN':'private-test-token'}):
+            app = AppTest.from_file(APP).run()
+            app.chat_input[0].set_value('drawer').run()
+            self.assertFalse(app.exception)
+            self.assertEqual(app.session_state['pending_github_logs'], [])
+            self.assertEqual(save.call_args[0][0], 'private-test-token')
+            self.assertNotIn('private-test-token', str(save.call_args[0][2]))
+            from escape_room.github_logs import LogSaveError
+            save.side_effect = LogSaveError('GitHub log save failed (HTTP 403).')
+            app.chat_input[0].set_value('desk').run()
+            self.assertFalse(app.exception)
+            self.assertEqual(len(app.session_state['pending_github_logs']), 1)
+            self.assertIn('desk', app.session_state['games']['v2']['state']['discovered'])
+            save.side_effect = None
+            app.button(key='retry_log_upload').click().run()
+            self.assertFalse(app.exception)
+            self.assertEqual(app.session_state['pending_github_logs'], [])

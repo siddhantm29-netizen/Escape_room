@@ -33,6 +33,10 @@ There is deliberately no shared-key fallback, including environment variables or
 
 Messages are sent to Google in AI mode. A visitor's quota and any enabled Google billing belong to that visitor's account. Offline mode makes no model requests. A disclaimer explaining these points is displayed at the bottom of the page.
 
+## Optional automatic diagnostic uploads
+
+Configure `GITHUB_LOG_TOKEN` in Streamlit Secrets using the [logging setup guide](LOGGING.md). This is a server-side GitHub token, separate from per-player Gemini keys. It writes only diagnostic files on the `app-logs` branch, leaving the deployment branch unchanged.
+
 ## Hosting smoke check
 
 - Open the hosted page and send `examine desk` in offline Version 2.

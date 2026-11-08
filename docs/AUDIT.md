@@ -34,3 +34,7 @@ The original course report records the earlier implementation milestone. This au
 ## Puzzle revision
 
 The later puzzle revision distributes digits across the desk, bookshelf, painting and locked drawer. Relative-position clues determine their order. Hints no longer provide direct answer cues or assemble the code. The full suite now contains 42 passing tests; the previous code is explicitly rejected.
+
+## Object shorthand and diagnostics
+
+Bare known object names now mean examine in Version 2, in both AI and offline modes. Unknown actions receive action guidance instead of a misleading nonexistent-object message. The diagnostics module records bounded metadata without keys or chat; optional GitHub uploads use a separate log branch and retain pending events on failure. Strict export validation rejects arbitrary fields and values. The full suite now contains 60 passing tests, including mocked GitHub upload, branch creation, conflict recovery, upload failure/retry and privacy checks. Actual token-based GitHub upload awaits administrator configuration.
