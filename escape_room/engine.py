@@ -91,6 +91,8 @@ def apply_action(state, action):
             state['inventory'].append('key')
         return result(True, 'The brass key is in your inventory.')
     if (kind == 'open' and target == 'drawer') or (kind == 'use' and target == 'key'):
+        if value:
+            return result(False, 'The drawer has a keyhole, not a combination lock. Use your collected brass key.')
         if 'key' not in state['inventory']:
             return result(False, 'You cannot use a key you have not collected.')
         state['drawer_open'] = True
