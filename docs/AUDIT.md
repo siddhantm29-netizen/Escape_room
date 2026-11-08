@@ -29,7 +29,7 @@ The new Game checks workflow runs installation, dependency compatibility, syntax
 
 The user's earlier live Gemini connection check succeeded. This audit uses controlled API responses and does not claim a full live-model playthrough or a measured prompt-injection failure rate. No guarantee of zero bugs or zero model misunderstanding is made. Version 1's model-authoritative behavior is an intentional comparison baseline, not equivalent to Version 2 validation.
 
-The original course report records the earlier implementation milestone. This audit and the current README record the latest test count, dependency versions and deployment setup.
+The course report was updated on 8 November 2026 to cover the completed application, randomized session puzzles, current privacy controls, responsive redesign and 86-test verification. Earlier counts below record the progression of the audit.
 
 ## Puzzle revision
 
@@ -58,3 +58,7 @@ Known-object inspection now supports check, inspect, search, read and look at/in
 ## Responsive investigation redesign
 
 The app now uses the user-selected playful evidence-board direction, with a side-by-side investigation workspace on desktop and a stacked layout on small screens. All prior game and privacy behavior is retained. Browser verification found and fixed a rapid-action ordering bug; pending actions are now processed in order instead of discarding a quick action when chat arrives immediately. The full suite contains 83 passing tests. Detailed viewport, focus, contrast, source-scan and browser-flow evidence is in REDESIGN.md.
+
+## Randomized session puzzles and final report
+
+Fresh sessions and restart now generate four distinct digits, consistent object clue text and a matching code without changing the checked-in template. Ordinary reruns retain the same puzzle. V1 receives its own session configuration; V2 validates against its private session puzzle and omits it from public state. The suite contains 86 passing tests, and GitHub checks passed for application commit 6f4c759. The three-page report and both diagrams now reflect this final implementation and distinguish verified behavior from outstanding live-model and hosting checks.
