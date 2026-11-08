@@ -1,54 +1,48 @@
 # The Last Library
-AI Escape Room | Completed application report | 8 November 2026
+Design and implementation | AI Escape Room mini-project
 
-## Room, puzzles and replay
-The Last Library is a Python/Streamlit escape room with five interactive objects: desk, bookshelf, painting, locked drawer and exit door. Examining the desk reveals a riddle. Solving it reveals a brass key, which must be collected before the drawer opens. Four clue fragments are distributed across the desk, bookshelf, painting and drawer. Their symbols and relative-position statements determine the digit order. The drawer note explains the ordering task; hints offer reasoning nudges without assembling the answer.
+## Project and puzzle design
+The application presents a locked library through a Streamlit chat interface. Players examine a desk, bookshelf, painting, drawer and exit door. A desk riddle reveals a brass key; collecting it allows the drawer to open. The drawer note explains how to combine numbers on book spines with the symbol order in the painting. The final four-digit code opens the exit only after the required trail has been completed.
 
-Each new browser session or restart samples four distinct digits and rebuilds the clue text and matching door code from a private copy of the room configuration. Ordinary Streamlit reruns preserve that puzzle. The two versions have independent conversations and session puzzles. The checked-in room.json remains a reproducible template, not a universal live-game solution. Random generation can occasionally repeat a previous combination.
+The room configuration is stored in room.json. Both versions share the same setting, clues and intended solution, making their behavior comparable. Each version has its own conversation and restart control. The interface supplies an introduction, command examples and a clear completion state. Version 2 also shows inventory, recorded clues and public session state for demonstration.
 
-## Interface and usability
-The redesigned page uses a playful investigation workspace: conversation and object controls beside an evidence board on desktop, stacked on narrow screens. Version 2 shows earned clues in discovery order, their source objects, inventory, clue count and exit status. Reading a locked drawer cannot reveal its note. Context buttons collect an available key and read an accessible note through the same rules as chat. Version 1 keeps clues in its conversation. Instructions, restart and API controls remain available.
-
-## Version 1: conversational baseline
-Gemini receives the session room configuration, including solutions, and conversation history. It narrates actions and tracks progress through text. Python accepts the model's escape marker rather than independently validating progress. This preserves the assignment's normal-play baseline, but forgotten prerequisites, invented items, leaked answers or an early completion marker can produce incorrect play.
+## Version 1: conversational Game Master
+The baseline sends the room configuration, including solutions, and conversation history to Gemini. The model narrates actions and is instructed to remember inventory and obey locks. Python records the conversation but does not independently decide whether an action is legal. It recognizes escape when the model emits a completion marker. This is a concise implementation of the normal-play requirement, but it makes the model the authority for both storytelling and progress.
 
 ![Version 1 architecture](architecture-v1.svg)
 
-Both versions default to gemini-3.5-flash-lite through the Gemini REST API. Version 1 uses temperature 0.2; Version 2 uses 0.0. Requests allow 1,024 output tokens and a 25-second timeout. The model ID is configurable and a connection-test control checks access. Lower temperature alone does not enforce game rules.
+The limitation is structural: if the model forgets a prerequisite, invents an item, leaks a solution or emits the marker too early, the interface accepts its answer. Better prompting may reduce these errors but cannot guarantee a valid game state. Version 1 remains available as an explicit baseline rather than being silently replaced by the improved engine.
 
-# Reliable actions and private sessions
-Version 2 | Python owns progress; the model interprets and selects wording
+# Making progress reliable
+Version 2 | State and validation outside the language model
 
-## Validation outside the model
-Version 2 keeps inventory, discoveries, solved puzzles, lock status and the session puzzle in Python. The model proposes a JSON action with exactly kind, target and value. The engine rejects malformed fields, unavailable objects and unmet prerequisites. Proposed answers and codes must appear explicitly in the player's current message. Common object names, inspection synonyms, note commands, direct riddle answers and four-digit attempts also have deterministic shortcuts.
+## State and action flow
+Version 2 maintains a Python dictionary containing room objects, discovered clues, collected items, solved puzzles, drawer status, door status and escape status. Gemini proposes one action with three string fields: kind, target and value. Python rejects malformed shapes, extra fields, unknown objects and unsupported actions. Answers and codes must occur in the current player message, preventing a parser from supplying its own solution.
 
 ![Version 2 architecture](architecture-v2.svg)
 
-A key must be revealed and collected before use. The drawer must be opened before its clue can be recorded. A correct code alone is insufficient: the desk riddle, bookshelf, painting and drawer trail must also be completed. Repeated discoveries do not duplicate items or clues. The hidden session configuration is excluded from the public state display.
+The engine checks prerequisites before changing state. A key must be revealed and collected before use; a locked drawer cannot be inspected; an incorrect code cannot open the exit. Repeated discoveries and collections are idempotent. The correct exit code alone is insufficient: the riddle, drawer note, book numbers and painting must all have been discovered. Restart constructs a new independent state.
 
-## Containing hallucinations and failures
-After validation, Python provides two equivalent descriptions of the earned outcome. Gemini selects an index; it cannot supply new player-facing prose on this path. An invalid selection uses the authored response. A parser failure applies no action; a narrator failure preserves the validated result. Explicit HTTP errors distinguish invalid keys, access problems, quota limits and service failures. Offline Version 2 supports authored commands without API access.
+## Grounded narration and service failures
+After validation, the engine supplies two equivalent descriptions containing only the earned outcome. Gemini selects a description by index. Python validates that selection and displays an authored fallback if it is invalid. This deliberately limits narrative variety while preventing model-generated objects or spoiler prose from reaching the player. The model still interprets natural-language input in live play. Solutions are never added to the parser prompt, although earned clues may appear in history.
 
-## Keys and diagnostic logs
-Each visitor supplies their own Gemini key, held only in session memory. The app does not save it in cookies, browser storage, files, logs or a shared key setting. Refresh starts a fresh session; Clear API key stops further use without deleting current progress. Disconnected sessions may remain briefly in server memory. The footer explains Google transmission, quotas, billing, temporary progress and diagnostic uploads.
+An action-parser failure leaves state unchanged. A narrator failure preserves the already validated action. Gemini is called through its documented HTTPS REST endpoint with a timeout and the API key in a header. The offline Version 2 demo uses exact commands and authored responses; it is clearly labeled and does not stand in for live LLM testing.
 
-Diagnostics retain only UTC timestamp, event, version, mode, outcome, elapsed milliseconds, processing stage and HTTP status. They exclude keys, chat, action types, selected objects, clues, inventory and puzzle progress. Optional automatic uploads use an administrator's private repository-scoped token and a separate public app-logs branch under logs/. Failed uploads remain queued for retry. Older cached entries are sanitized before display or upload.
+# Evidence and remaining checks
+Testing, implementation problems and improvements
 
-# Evidence, fixes and deployment
-Verification against the completed application
+## Verification performed
+The automated suite contains 25 passing tests. It covers the complete escape path, missing inventory, wrong combinations, premature correct codes, repeated actions, malformed model output, invented answers, narration failure, service errors and model-ID validation. Streamlit AppTest completes the offline game, checks that escape disables chat, restarts the session and confirms isolation between the two versions. A browser check also verified that examining the desk displays its riddle.
 
-## Automated and browser checks
-All 86 automated tests pass. They cover complete offline play, wrong and premature codes, inventory gates, malformed model responses, invented answers, API failures, session/version isolation, key clearing, clue display, log privacy, upload retry and action ordering. Random-puzzle tests verify matching digit text and code, solvability across generated sessions, an unchanged template, stable puzzles during play and regeneration on restart. GitHub's Game checks workflow passed for application commit 6f4c759.
+Six comparative cases use controlled model outputs: using an uncollected key; accepting an incorrect drawer code; claiming puzzles were already solved; impersonating an administrator; requesting secret solutions; and inventing an escape window. V1 accepts the injected prose or completion marker. V2 rejects invalid proposed transitions and preserves game state. These are reproducible fault-injection tests, not claims that Gemini actually produced those responses.
 
-Browser play verified inspection, solving the riddle, key collection, drawer opening, reading the note, the full notebook, victory and restart. Layout checks at 320, 375, 768, 1280 and 1920 pixels found no horizontal overflow in the main content. Keyboard activation and a visible focus outline were checked. Tested custom text colour pairs had at least 5.85:1 contrast. The page uses native Streamlit controls and responsive CSS, without Bootstrap; these checks do not guarantee every device or certify accessibility.
+## Problems encountered and fixes
+A regression test exposed a drawer bug: once the player owned the key, a drawer-code attempt could be treated as key use. The validator now rejects nonempty code values for that keyed lock. The Gemini integration originally hid unexpected HTTP statuses behind a generic unavailable message. It now identifies service statuses safely, recognizes invalid-key errors and provides a connection-test button. The default model was updated to gemini-3.5-flash-lite after current Google documentation showed access restrictions for new users of the earlier 2.5 model.
 
-## Comparison and bugs resolved
-Six controlled comparison cases cover an uncollected key, incorrect drawer code, claimed puzzle completion, administrator impersonation, secret-solution requests and an invented escape window. The V1 harness accepts injected prose or escape markers; V2 rejects invalid transitions. These are fault-injection tests, not measured Gemini attack-success rates. V2 limits both state corruption and free-form spoiler output while retaining natural-language interpretation.
+## Limits and next verification
+After the integration changes, the user confirmed that the live connection test succeeded with their API key and gemini-3.5-flash-lite. This verifies a short valid-key generation. Full live gameplay and repeated adversarial trials are still pending; the repository includes a dated-model manual test protocol. Model interpretation accuracy and resistance to individual prompts cannot be inferred from a connection check or mocked responses.
 
-Resolved defects include accepting a drawer code as key use, matching answers inside longer words or numbers, unsafe malformed API responses, hidden HTTP errors and whitespace-only keys. Command handling now recognizes bare objects, book after the desk riddle, open/read note and Check Drawer. Earned clues remain visible in the notebook. Browser testing also exposed a dropped quick action when chat arrived immediately afterward; a session queue now processes actions in order.
+Python validation protects game progress even when the parser is wrong, but it cannot perfectly infer player intent. Constrained narration trades open-ended storytelling for predictable facts. Source-code readers can inspect the puzzle solutions; the goal is reliable play through the interface. The application stores sessions in memory, caps each game at 60 turns and does not provide durable saves or shared accounts.
 
-## Portfolio and hosting
-The completed app, report, architecture diagrams and tests are in github.com/siddhantm29-netizen/Escape_room. The workflow checks dependency compatibility, Python syntax, tests and known dependency vulnerabilities. Python 3.12 is the tested hosting setup; requirements pin Streamlit 1.67.0 and Pillow 13.0.0. Streamlit Community Cloud must connect to main and run app.py. GitHub Pages cannot execute this Python app. No deployed Cloud URL or real token-based log upload was verified in this work.
-
-## Limits and references
-The user previously confirmed a successful live Gemini connection check. Full live gameplay and repeated adversarial model trials were not re-evaluated for the final build. V1 remains model-authoritative; V2 can still misinterpret intent, although Python controls valid progress. Sessions are temporary, limited to 60 turns per version and have no durable saves. The design combines avoid-ai-design and Hallmark guidance with retained licences. Assignment basis: MiniProject_01_EscapeRoom.pdf. Implementation references: ai.google.dev/api/generate-content; docs.streamlit.io/develop/api-reference/app-testing; deployment steps and detailed evidence are in docs/DEPLOYMENT.md and docs/REDESIGN.md.
+## References and deliverables
+The repository contains both versions, architecture diagrams, a spoiler walkthrough and a test comparison. Technical references: ai.google.dev/api/generate-content; ai.google.dev/gemini-api/docs/models; ai.google.dev/gemini-api/docs/pricing; docs.streamlit.io/develop/api-reference/app-testing/st.testing.v1.apptest. Requirements follow the supplied MiniProject_01_EscapeRoom.pdf.
