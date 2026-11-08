@@ -64,10 +64,17 @@ def v2_turn(state, history, prompt, model=None, diagnostics=None):
     command = parse_command(prompt)
     # A single object name has one safe meaning, regardless of model availability.
     object_shortcut = re.fullmatch(r'(?:the )?(desk|bookshelf|painting|drawer|door|key)[.!?]?', prompt.strip().lower())
-    if model is None or object_shortcut:
+    answer = prompt.strip().lower().rstrip('.!')
+    riddle_answer = ('desk' in state['discovered'] and 'riddle' not in state['solved']
+                     and answer in ROOM['riddle_answers'])
+    code_attempt = re.fullmatch(r'\d{4}', prompt.strip())
+    if riddle_answer:
+        command = {'kind':'solve','target':'desk','value':answer}
+    elif code_attempt:
+        command = {'kind':'unlock','target':'door','value':prompt.strip()}
+    if model is None or object_shortcut or riddle_answer or code_attempt:
         event = apply_action(state, command)
-        debug.update(outcome='success' if event['ok'] else 'rejected', stage='validation',
-                     action_kind=command['kind'], target=command['target'])
+        debug.update(outcome='success' if event['ok'] else 'rejected', stage='validation')
         return event['options'][0], ''
     try:
         # Parser sees only conversation for reference, never room solutions or writable state.
@@ -84,8 +91,6 @@ def v2_turn(state, history, prompt, model=None, diagnostics=None):
                 return result(False, 'State unchanged: enter your own answer or code explicitly.')['options'][0], ''
         event = apply_action(state, action)
         debug.update(outcome='success' if event['ok'] else 'rejected', stage='validation')
-        if isinstance(action, dict):
-            debug.update(action_kind=action.get('kind'), target=action.get('target'))
         if not isinstance(action, dict) or set(action) != {'kind', 'target', 'value'}:
             return event['options'][0], 'The model returned an invalid action; state was preserved.'
     except ModelError as error:

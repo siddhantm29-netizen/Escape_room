@@ -12,7 +12,7 @@ class GitHubLogTests(unittest.TestCase):
     @patch('escape_room.github_logs.urlopen')
     def test_creates_timestamped_session_log_without_exposing_token(self, request):
         events=[]
-        record_event(events,'turn',version='v2',mode='offline',outcome='rejected',target='drawer')
+        record_event(events,'turn',version='v2',mode='offline',outcome='rejected')
         request.return_value.__enter__.return_value = BytesIO(b'{"content":{"sha":"new-sha"}}')
         name='session-'+'a'*32+'.json'
         self.assertEqual(save_log('private-token',name,events), 'new-sha')

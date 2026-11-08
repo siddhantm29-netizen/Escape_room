@@ -33,3 +33,29 @@ class ObjectShortcutTests(unittest.TestCase):
         self.assertIn('examine drawer', text)
         self.assertNotIn('That object is not available', text)
         self.assertEqual(parse_command('drawer and door')['kind'], 'unknown')
+
+    def test_bare_riddle_answer_works_after_examining_desk(self):
+        for model in (None, FakeModel()):
+            state = new_state()
+            v2_turn(state, [], 'desk')
+            text, warning = v2_turn(state, [], 'book', model)
+            self.assertIn('riddle', state['solved'])
+            self.assertTrue(state['key_available'])
+            if model is not None:
+                self.assertEqual(model.calls, [])
+
+    def test_bare_riddle_answer_does_not_skip_examination(self):
+        state = new_state()
+        v2_turn(state, [], 'book')
+        self.assertFalse(state['key_available'])
+        self.assertNotIn('riddle', state['solved'])
+
+    def test_bare_door_code_still_requires_all_discoveries(self):
+        from escape_room.engine import ROOM
+        state = new_state()
+        v2_turn(state, [], ROOM['door_code'])
+        self.assertFalse(state['escaped'])
+        for command in ('desk','book','take key','open drawer','drawer','bookshelf','painting'):
+            v2_turn(state, [], command)
+        v2_turn(state, [], ROOM['door_code'], FakeModel())
+        self.assertTrue(state['escaped'])

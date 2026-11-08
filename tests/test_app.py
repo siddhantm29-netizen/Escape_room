@@ -112,8 +112,8 @@ class AppTests(unittest.TestCase):
         app.chat_input[0].set_value('drawer').run()
         self.assertFalse(app.exception)
         event = app.session_state['diagnostic_events'][-1]
-        self.assertEqual(event['target'], 'drawer')
-        self.assertEqual(event['action_kind'], 'examine')
+        self.assertNotIn('target', event)
+        self.assertNotIn('action_kind', event)
         self.assertEqual(event['outcome'], 'rejected')
         self.assertNotIn('content', event)
         self.assertNotIn('api_key', event)
@@ -165,3 +165,19 @@ class AppTests(unittest.TestCase):
         text = ' '.join(m.value for m in notebook.markdown)
         self.assertNotIn(ROOM['clues']['desk']['text'], text)
         self.assertEqual(app.metric[0].value, '0/4')
+
+    def test_legacy_gameplay_log_fields_are_removed_on_rerun(self):
+        from escape_room.diagnostics import record_event
+        events=[]
+        entry=record_event(events,'turn',version='v2',mode='offline',outcome='success')
+        old=dict(entry,target='drawer',action_kind='examine',clue='private clue')
+        app=AppTest.from_file(APP)
+        app.session_state['diagnostic_events']=[old]
+        app.session_state['pending_github_logs']=[{'filename':'session-'+'a'*32+'.json','entry':old}]
+        app.run()
+        self.assertFalse(app.exception)
+        self.assertEqual(app.session_state['diagnostic_events'],[entry])
+        self.assertEqual(app.session_state['pending_github_logs'][0]['entry'],entry)
+        app.chat_input[0].set_value('desk').run()
+        app.chat_input[0].set_value('book').run()
+        self.assertTrue(app.session_state['games']['v2']['state']['key_available'])

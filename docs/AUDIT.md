@@ -42,3 +42,7 @@ Bare known object names now mean examine in Version 2, in both AI and offline mo
 ## Clue notebook
 
 Version 2 now displays the complete text of earned clues in discovery order, with the source object and desk riddle retained for reference. The drawer fragment requires opening and examination. The progress metric counts four fragments rather than three puzzle milestones. Restart clears notes, repeat examinations do not duplicate them, and no final order/code is assembled. The full suite now contains 64 passing tests, including notebook UI rendering, hidden clues and restart.
+
+## Minimal diagnostics and contextual answers
+
+Action kinds and object names have been removed from all new diagnostics. The log schema now has only eight technical fields: UTC timestamp, event category, version, mode, result, duration, processing stage and HTTP status. Cached session entries and pending uploads from older versions are stripped before display or upload; legacy extra fields fail strict export validation. The GitHub log branch initially contained no JSON event files to clean. Direct riddle answers after examining the desk and direct four-digit code attempts now use Python validation in both modes. Restarting the stale local Streamlit process resolved the notebook import error; a fresh process successfully imports the function. The full suite contains 71 passing tests.

@@ -14,9 +14,9 @@ class DiagnosticsTests(unittest.TestCase):
         events = []
         for _ in range(210):
             record_event(events, 'turn', version='v2', mode='offline', outcome='rejected',
-                         elapsed_ms=12, action_kind='open', target='drawer')
+                         elapsed_ms=12)
         self.assertEqual(len(events), 200)
-        self.assertEqual(events[-1]['target'], 'drawer')
+        self.assertNotIn('target', events[-1])
         self.assertEqual(events[-1]['elapsed_ms'], 12)
         self.assertEqual(json.loads(log.call_args[0][1]), events[-1])
 
@@ -25,7 +25,7 @@ class DiagnosticsTests(unittest.TestCase):
         events = []
         secret = 'secret-key-and-code-8426'
         record_event(events, 'turn', version=secret, mode=secret, outcome=secret,
-                     action_kind=secret, target=secret, stage=secret, http_status=secret)
+                     stage=secret, http_status=secret)
         self.assertNotIn(secret, json.dumps(events))
         self.assertNotIn(secret, str(log.call_args))
         with self.assertRaises(TypeError):
@@ -35,8 +35,8 @@ class DiagnosticsTests(unittest.TestCase):
         diag = {}
         v2_turn(new_state(), [], 'drawer', diagnostics=diag)
         self.assertEqual(diag['outcome'], 'rejected')
-        self.assertEqual(diag['action_kind'], 'examine')
-        self.assertEqual(diag['target'], 'drawer')
+        self.assertNotIn('action_kind', diag)
+        self.assertNotIn('target', diag)
 
     def test_api_failure_records_stage_and_status_without_message(self):
         diag = {}

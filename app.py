@@ -7,7 +7,7 @@ import streamlit as st
 from escape_room.engine import ROOM, new_state, public_state, collected_clues
 from escape_room.game import v1_turn, v2_turn
 from escape_room.llm import Gemini, ModelError, DEFAULT_MODEL
-from escape_room.diagnostics import record_event as record_metadata, http_status
+from escape_room.diagnostics import record_event as record_metadata, http_status, sanitize_event
 from escape_room.github_logs import ensure_log_branch, save_log, LogSaveError, LOG_BRANCH, REPOSITORY
 
 st.set_page_config(page_title='The Last Library | AI Escape Room', page_icon='🗝️', layout='centered')
@@ -16,6 +16,13 @@ for name, default in {'diagnostic_events': [], 'pending_github_logs': [],
                       'github_log_status': ''}.items():
     if name not in st.session_state:
         st.session_state[name] = default
+
+# Clean earlier sessions before any display, export or queued upload.
+st.session_state.diagnostic_events = [clean for entry in st.session_state.diagnostic_events
+                                      if (clean := sanitize_event(entry)) is not None]
+st.session_state.pending_github_logs = [dict(item, entry=clean)
+    for item in st.session_state.pending_github_logs
+    if (clean := sanitize_event(item.get('entry'))) is not None]
 
 
 def github_log_token():
@@ -111,6 +118,7 @@ with st.sidebar:
     with st.expander('How to play', expanded=True):
         st.write('Explore five objects, solve the desk riddle, collect what you find, and combine the clues to unlock the exit.')
         st.write('An object name on its own examines it. With Gemini, describe one action in your own words. For example: “Look closely at the writing desk.”')
+        st.caption('After reading the desk riddle, you can type your answer directly. Four digits alone attempt the exit code.')
         st.code('look\nexamine desk\nsolve desk YOUR_ANSWER\ntake key\nopen drawer\nunlock door YOUR_CODE\ninventory\nhint', language=None)
     with st.expander('What changed in Version 2?'):
         st.write('Python owns inventory, locks and puzzle progress. Gemini proposes actions and chooses verified descriptions. Version 1 relies on conversation and the model’s judgment.')
@@ -193,7 +201,7 @@ if is_v2:
     with st.expander('Session state · for the assignment demo'):
         st.json(public_state(game['state']))
 with st.expander('Diagnostic log (no chat text or API keys)'):
-    st.caption('The latest 200 events from this browser session record action types, results, timing and API status codes. Share this log when reporting a bug. Cloud administrators can also see these metadata events in server logs.')
+    st.caption('The latest 200 events from this browser session record technical results, processing stages, timing and API status codes only. Share this log when reporting a bug. Cloud administrators can also see these metadata events in server logs.')
     st.download_button('Download diagnostic log', data=json.dumps(st.session_state.diagnostic_events, indent=2),
                        file_name='escape-room-diagnostics.json', mime='application/json')
     st.caption(st.session_state.github_log_status or 'Automatic GitHub saving starts with the first event when configured.')
@@ -206,4 +214,4 @@ with st.expander('Diagnostic log (no chat text or API keys)'):
         st.json(st.session_state.diagnostic_events[-5:])
 st.divider()
 st.caption('Built with Python, Streamlit and Gemini. Offline mode uses authored responses; AI mode requires your own API key.')
-st.caption('Privacy & API use: Your key is held only in this session’s memory. This app does not save it to cookies, browser storage, files or a database, and does not share it with other players. Refreshing starts a new session without a key; Clear API key stops further requests with it. In AI mode, your messages and key are sent over HTTPS to Google to process the request. Google’s data terms, quota limits and any billing on your account apply. Do not enter sensitive personal information. Game progress is temporary and can reset when the session ends. Diagnostic logs contain action metadata and error codes, never your key, chat text or puzzle answers. When automatic saving is configured, this metadata is saved to the public GitHub repository. Browser password managers are controlled by your browser, not this app.')
+st.caption('Privacy & API use: Your key is held only in this session’s memory. This app does not save it to cookies, browser storage, files or a database, and does not share it with other players. Refreshing starts a new session without a key; Clear API key stops further requests with it. In AI mode, your messages and key are sent over HTTPS to Google to process the request. Google’s data terms, quota limits and any billing on your account apply. Do not enter sensitive personal information. Game progress is temporary and can reset when the session ends. Diagnostic logs contain technical results, timing and error codes only. They exclude keys, chat, action types, selected objects, clues, inventory and puzzle progress. When automatic saving is configured, this metadata is saved to the public GitHub repository. Browser password managers are controlled by your browser, not this app.')
