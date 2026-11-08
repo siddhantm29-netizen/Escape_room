@@ -50,3 +50,7 @@ Action kinds and object names have been removed from all new diagnostics. The lo
 ## Note commands
 
 Open/read/examine note now maps to examining the existing drawer contents. It cannot open a locked drawer or reveal its clue early. Both modes support these exact shortcuts without relying on a model guess. The opening response names the supported commands, and reading records the clue in the notebook. The full suite now contains 75 passing tests.
+
+## Inspection synonyms
+
+Known-object inspection now supports check, inspect, search, read and look at/in/inside, with optional articles and polite prefixes, case-insensitive matching and normalized whitespace. Recognized inspection commands use Python validation in both modes. Unknown objects and multiple-action strings remain rejected. The full suite now contains 79 passing tests.
