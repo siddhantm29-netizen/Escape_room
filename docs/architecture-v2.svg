@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg
+  PUBLIC '-//W3C//DTD SVG 1.0//EN'
+  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
+<svg width="500" height="235" preserveAspectRatio="xMinYMin meet" viewBox="0 0 500 235" xmlns="http://www.w3.org/2000/svg" version="1.0" fill-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>...</title>
+	<desc>...</desc>
+	<clipPath id="clip">
+		<rect x="0" y="0" width="500" height="235"/>
+	</clipPath>
+	<g id="group" transform="scale(1,-1) translate(0,-235)" style="clip-path: url(#clip)">
+		<g transform="">
+			<rect x="0" y="178" width="130" height="43" rx="5" ry="5" style="stroke: rgb(72%,67%,59%); stroke-linecap: butt; stroke-width: 1; fill: rgb(93%,90%,86%); fill-rule: evenodd;"/>
+			<text x="28.4825" y="203" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(16%,14%,12%); stroke:none;" transform="translate(0,406) scale(1,-1)">Player / Streamlit</text>
+			<text x="16.6556" y="189" style="font-family: Helvetica; font-size: 7.8px;fill: rgb(16%,14%,12%); stroke:none;" transform="translate(0,378) scale(1,-1)">one natural-language action</text>
+			<rect x="185" y="178" width="130" height="43" rx="5" ry="5" style="stroke: rgb(72%,67%,59%); stroke-linecap: butt; stroke-width: 1; fill: rgb(93%,90%,86%); fill-rule: evenodd;"/>
+			<text x="219.7375" y="203" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(16%,14%,12%); stroke:none;" transform="translate(0,406) scale(1,-1)">Gemini parser</text>
+			<text x="210.766" y="189" style="font-family: Helvetica; font-size: 7.8px;fill: rgb(16%,14%,12%); stroke:none;" transform="translate(0,378) scale(1,-1)">proposed JSON action</text>
+			<rect x="370" y="178" width="130" height="43" rx="5" ry="5" style="stroke: rgb(72%,67%,59%); stroke-linecap: butt; stroke-width: 1; fill: rgb(93%,90%,86%); fill-rule: evenodd;"/>
+			<text x="399.7425" y="203" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(16%,14%,12%); stroke:none;" transform="translate(0,406) scale(1,-1)">Python validator</text>
+			<text x="393.7068" y="189" style="font-family: Helvetica; font-size: 7.8px;fill: rgb(16%,14%,12%); stroke:none;" transform="translate(0,378) scale(1,-1)">schema + preconditions</text>
+			<rect x="370" y="95" width="130" height="43" rx="5" ry="5" style="stroke: rgb(72%,67%,59%); stroke-linecap: butt; stroke-width: 1; fill: rgb(93%,90%,86%); fill-rule: evenodd;"/>
+			<text x="394.113" y="120" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(16%,14%,12%); stroke:none;" transform="translate(0,240) scale(1,-1)">State + room JSON</text>
+			<text x="390.5673" y="106" style="font-family: Helvetica; font-size: 7.8px;fill: rgb(16%,14%,12%); stroke:none;" transform="translate(0,212) scale(1,-1)">inventory, locks, solutions</text>
+			<rect x="0" y="12" width="130" height="43" rx="5" ry="5" style="stroke: rgb(72%,67%,59%); stroke-linecap: butt; stroke-width: 1; fill: rgb(93%,90%,86%); fill-rule: evenodd;"/>
+			<text x="20.486000000000004" y="37" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(16%,14%,12%); stroke:none;" transform="translate(0,74) scale(1,-1)">Verified descriptions</text>
+			<text x="24.2489" y="23" style="font-family: Helvetica; font-size: 7.8px;fill: rgb(16%,14%,12%); stroke:none;" transform="translate(0,46) scale(1,-1)">only earned information</text>
+			<rect x="185" y="12" width="130" height="43" rx="5" ry="5" style="stroke: rgb(72%,67%,59%); stroke-linecap: butt; stroke-width: 1; fill: rgb(93%,90%,86%); fill-rule: evenodd;"/>
+			<text x="216.24099999999999" y="37" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(16%,14%,12%); stroke:none;" transform="translate(0,74) scale(1,-1)">Gemini narrator</text>
+			<text x="207.7318" y="23" style="font-family: Helvetica; font-size: 7.8px;fill: rgb(16%,14%,12%); stroke:none;" transform="translate(0,46) scale(1,-1)">select approved wording</text>
+			<rect x="370" y="12" width="130" height="43" rx="5" ry="5" style="stroke: rgb(72%,67%,59%); stroke-linecap: butt; stroke-width: 1; fill: rgb(93%,90%,86%); fill-rule: evenodd;"/>
+			<text x="399.7335" y="37" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(16%,14%,12%); stroke:none;" transform="translate(0,74) scale(1,-1)">UI / safe fallback</text>
+			<text x="394.6818" y="23" style="font-family: Helvetica; font-size: 7.8px;fill: rgb(16%,14%,12%); stroke:none;" transform="translate(0,46) scale(1,-1)">validate narration index</text>
+			<path d="M 130,199 L 185,199 Z" style="stroke: rgb(57%,29%,18%); stroke-linecap: butt; stroke-width: 1.2;"/>
+			<polygon points="185 199, 179 202, 179 196" style="stroke: rgb(57%,29%,18%); stroke-linecap: butt; stroke-width: 1; fill: rgb(57%,29%,18%); fill-rule: evenodd;"/>
+			<path d="M 315,199 L 370,199 Z" style="stroke: rgb(57%,29%,18%); stroke-linecap: butt; stroke-width: 1.2;"/>
+			<polygon points="370 199, 364 202, 364 196" style="stroke: rgb(57%,29%,18%); stroke-linecap: butt; stroke-width: 1; fill: rgb(57%,29%,18%); fill-rule: evenodd;"/>
+			<path d="M 435,178 L 435,138 Z" style="stroke: rgb(57%,29%,18%); stroke-linecap: butt; stroke-width: 1.2;"/>
+			<polygon points="435 138, 438 144, 432 144" style="stroke: rgb(57%,29%,18%); stroke-linecap: butt; stroke-width: 1; fill: rgb(57%,29%,18%); fill-rule: evenodd;"/>
+			<path d="M 370,116 L 65,55 Z" style="stroke: rgb(57%,29%,18%); stroke-linecap: butt; stroke-width: 1.2;"/>
+			<polygon points="65 55, 71.47183 53.23495, 70.29514 59.11844" style="stroke: rgb(57%,29%,18%); stroke-linecap: butt; stroke-width: 1; fill: rgb(57%,29%,18%); fill-rule: evenodd;"/>
+			<path d="M 130,33 L 185,33 Z" style="stroke: rgb(57%,29%,18%); stroke-linecap: butt; stroke-width: 1.2;"/>
+			<polygon points="185 33, 179 36, 179 30" style="stroke: rgb(57%,29%,18%); stroke-linecap: butt; stroke-width: 1; fill: rgb(57%,29%,18%); fill-rule: evenodd;"/>
+			<path d="M 315,33 L 370,33 Z" style="stroke: rgb(57%,29%,18%); stroke-linecap: butt; stroke-width: 1.2;"/>
+			<polygon points="370 33, 364 36, 364 30" style="stroke: rgb(57%,29%,18%); stroke-linecap: butt; stroke-width: 1; fill: rgb(57%,29%,18%); fill-rule: evenodd;"/>
+			<text x="143.22" y="58" style="font-family: Times-Roman; font-size: 8px;fill: rgb(57%,29%,18%); stroke:none;" transform="translate(0,116) scale(1,-1)">options</text>
+			<text x="113.1345" y="130" style="font-family: Times-Roman; font-size: 9px;fill: rgb(57%,29%,18%); stroke:none;" transform="translate(0,260) scale(1,-1)">Only Python changes game progress.</text>
+		</g>
+	</g>
+</svg>
