@@ -8,7 +8,7 @@ For offline play select Version 2 and leave Use Gemini off. Enter one command at
 2. `solve desk book` — reveal the brass key.
 3. `take key` — add it to inventory.
 4. `open drawer` — use the collected key.
-5. `examine drawer` — find an **oak seal marked 8** and the instruction to follow the keepers' procession, rather than discovery order.
+5. `read note` (or `open note` / `examine drawer`) — find an **oak seal marked 8** and the instruction to follow the keepers' procession, rather than discovery order.
 6. `examine bookshelf` — find a **sun marked 4**. Its card says the sun stands immediately before the star.
 7. `examine painting` — find a **star marked 2**. The frame says the oak is first.
 8. Combine the relations: oak first, moon last, sun immediately before star. The only order is **oak, sun, star, moon**, giving **8426**.

@@ -41,6 +41,8 @@ def apply_action(state, action):
             or action['kind'] not in KINDS):
         return result(False, 'That action could not be understood. Try one action at a time.')
     kind, target, value = (action[k].strip().lower() for k in ('kind', 'target', 'value'))
+    if target == 'note' and kind in {'open','examine'} and not value:
+        kind, target = 'examine', 'drawer'
     if state['escaped']:
         return result(True, 'You have already escaped. Restart to play again.')
     if kind == 'look':
@@ -110,7 +112,7 @@ def apply_action(state, action):
         if 'key' not in state['inventory']:
             return result(False, 'You cannot use a key you have not collected.')
         state['drawer_open'] = True
-        return result(True, 'Your brass key opens the drawer. Examine it to read the note inside.')
+        return result(True, 'Your brass key opens the drawer. Read the note inside with "read note" or "examine drawer".')
     if kind in {'unlock', 'open'} and target == 'door':
         if value != ROOM['door_code']:
             return result(False, 'The keypad rejects the combination. The exit remains locked.')
