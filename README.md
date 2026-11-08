@@ -100,7 +100,7 @@ Sessions are in-memory and restartable; a fresh browser session resets progress.
 
 This project demonstrates LLM integration, Python state machines, validation, adversarial tests and a Streamlit interface. Include the report and repository link in your submission. For a class demo, show a normal V1 action, repeat a bypass attempt in both versions, complete V2, and inspect its state. Use the comparison table to explain the change in trust boundary.
 
-The local clone is prepared for publication; it has not been pushed. Local Git history contains separate engine, application and validation milestones. To publish your prepared local commits to your repository, run:
+The project is published in this GitHub repository. Git history contains separate engine, application and validation milestones. To upload future local commits, run:
 
 ```sh
 git push -u origin main
