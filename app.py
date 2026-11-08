@@ -4,16 +4,17 @@ import json
 from time import perf_counter
 from uuid import uuid4
 import streamlit as st
-from escape_room.engine import ROOM, new_state, public_state, collected_clues
+from escape_room.engine import ROOM, new_state, public_state
+from escape_room.interface import apply_design, render_heading, render_notebook, render_conversation, render_privacy
 from escape_room.game import v1_turn, v2_turn
 from escape_room.llm import Gemini, ModelError, DEFAULT_MODEL
 from escape_room.diagnostics import record_event as record_metadata, http_status, sanitize_event
 from escape_room.github_logs import ensure_log_branch, save_log, LogSaveError, LOG_BRANCH, REPOSITORY
 
-st.set_page_config(page_title='The Last Library | AI Escape Room', page_icon='🗝️', layout='centered')
+st.set_page_config(page_title='The Last Library | AI Escape Room', page_icon=':material/key:', layout='wide')
 for name, default in {'diagnostic_events': [], 'pending_github_logs': [],
                       'diagnostic_session': uuid4().hex, 'diagnostic_sequence': 0,
-                      'github_log_status': ''}.items():
+                      'github_log_status': '', 'pending_actions': []}.items():
     if name not in st.session_state:
         st.session_state[name] = default
 
@@ -73,16 +74,16 @@ def clear_api_key():
                  mode='ai', outcome='cleared', stage='ui')
 
 
-st.markdown('''<style>
-:root { --ink: #29251f; --accent: #934c2e; }
-h1 { font-family: Georgia, serif; letter-spacing: -0.035em; }
-[data-testid="stChatMessage"] { border: 1px solid #d8d0c2; border-radius: 0.5rem; }
-.stButton > button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-</style>''', unsafe_allow_html=True)
+apply_design()
+
+
+def queue_action(command, version):
+    st.session_state.pending_actions.append({'command':command, 'version':version})
+
 
 with st.sidebar:
-    st.caption('AI ESCAPE ROOM / COURSE PROJECT')
-    version = st.radio('Game version', ['Version 2 · Validated', 'Version 1 · Conversational'], key='game_version')
+    st.header('Game desk')
+    version = st.radio('Game version', ['Version 2 · Validated', 'Version 1 · Conversational'], key='game_version', format_func=lambda value: value.replace(' · ', ': '))
     live = st.toggle('Use Gemini', value=False)
     api_key = st.text_input('Gemini API key', type='password',
                             key='gemini_api_key', max_chars=200, autocomplete='off',
@@ -115,7 +116,7 @@ with st.sidebar:
     else:
         st.caption('Offline demo uses exact commands and authored responses. It makes no AI requests.')
     restart = st.button('Restart this version', key='restart_game', use_container_width=True)
-    with st.expander('How to play', expanded=True):
+    with st.expander('How to play', expanded=False):
         st.write('Explore five objects, solve the desk riddle, collect what you find, and combine the clues to unlock the exit.')
         st.write('An object name on its own examines it. With Gemini, describe one action in your own words. For example: “Look closely at the writing desk.”')
         st.caption('After reading the desk riddle, you can type your answer directly. Four digits alone attempt the exit code.')
@@ -128,54 +129,56 @@ slot = 'v2' if is_v2 else 'v1'
 if 'games' not in st.session_state:
     st.session_state.games = {}
 if restart or slot not in st.session_state.games:
-    st.session_state.games[slot] = {'history': [], 'state': new_state(), 'escaped': False, 'warning': ''}
+    st.session_state.games[slot] = {'history': [], 'state': new_state(randomize=True), 'escaped': False, 'warning': ''}
 game = st.session_state.games[slot]
 if restart:
+    st.session_state.pending_actions = []
+    st.session_state.pop('quick_action',None)
     record_event(st.session_state.diagnostic_events, 'restart', version=slot,
                  mode='ai' if live else 'offline', outcome='restarted', stage='ui')
 
-st.caption('THE LAST LIBRARY / AN INTERACTIVE MYSTERY')
-st.title('One room. A way out.')
-st.write('Follow the clues through a forgotten library. Every discovery brings the exit closer.')
-st.caption(f'{version}  •  ' + ('Gemini · live API' if live else 'Offline demo'))
-
-if is_v2:
-    state = game['state']
-    notes = collected_clues(state)
-    a, b, c = st.columns(3)
-    a.metric('Clues recorded', f'{len(notes)}/{len(ROOM["clues"])}')
-    b.metric('Inventory', 'Brass key' if 'key' in state['inventory'] else 'Empty')
-    c.metric('Exit', 'Open' if state['escaped'] else 'Locked')
-    st.progress(len(notes) / len(ROOM['clues']), text='Record discoveries and compare the markings scattered around the room.')
-    with st.expander('Clue notebook', expanded=True):
-        st.caption('Clues are saved here as you examine objects, in discovery order. Compare them to work out the sequence.')
-        if not notes:
-            st.info('No clues collected yet. Examine the objects around you.')
-        for note in notes:
-            with st.container(border=True):
-                st.markdown('**' + note['object'].capitalize() + '**')
-                st.write(note['text'])
-
-else:
-    st.info('Version 1 lets the AI manage the story and remember progress through chat. Enable Gemini to play this baseline.')
-
-with st.chat_message('assistant', avatar='🗝️'):
-    st.write(ROOM['intro'])
-for message in game['history']:
-    with st.chat_message(message['role']):
-        st.write(message['content'])
-if game['warning']:
-    st.warning(game['warning'])
 escaped = game['state']['escaped'] if is_v2 else game['escaped']
-if escaped:
-    st.success('You escaped the library! Restart this version to play again.')
-if live and not api_key:
-    st.info('Enter your Gemini API key in the sidebar to start AI play.')
 turn_limit = len(game['history']) >= 120
-if turn_limit:
-    st.info('This session has reached 60 turns. Restart to begin another game.')
-prompt = st.chat_input('What do you investigate?', max_chars=1000,
-                       disabled=escaped or turn_limit or (live and not api_key) or (not is_v2 and not live))
+input_disabled = escaped or turn_limit or (live and not api_key) or (not is_v2 and not live)
+render_heading(live,is_v2)
+with st.container(key='play_layout'):
+    investigation,evidence = st.columns([1.25,1],gap='large')
+    with investigation:
+        with st.container(key='investigation_panel'):
+            st.header('Investigate the room')
+            with st.container(horizontal=True,gap='small',key='object_actions'):
+                for target in ROOM['objects']:
+                    st.button(target.capitalize(), key='inspect_'+target, disabled=input_disabled,
+                              on_click=queue_action,args=('check '+target,slot))
+            render_conversation(game,escaped)
+            if live and not api_key:
+                st.info('Enter your Gemini API key in the sidebar to start AI play.')
+            if turn_limit:
+                st.info('This session has reached 60 turns. Restart to begin another game.')
+            prompt = st.chat_input('What do you investigate?',max_chars=1000,disabled=input_disabled,key='player_message')
+            st.caption('Type an action, or choose an object above to inspect it.')
+            if is_v2 and game['state']['key_available'] and 'key' not in game['state']['inventory']:
+                st.button('Collect brass key',key='collect_key',type='primary',disabled=input_disabled,
+                          on_click=queue_action,args=('take key',slot))
+            if is_v2 and game['state']['drawer_open'] and 'drawer' not in game['state']['discovered']:
+                st.button('Read the drawer note',key='read_drawer_note',type='primary',disabled=input_disabled,
+                          on_click=queue_action,args=('read note',slot))
+    with evidence:
+        if is_v2:
+            render_notebook(game['state'])
+        else:
+            st.subheader('Follow the conversation')
+            st.write('Version 1 keeps its clues and inventory in the AI conversation. Version 2 adds a validated clue notebook.')
+            st.info('Enable Gemini in the sidebar to play Version 1.')
+legacy_action = st.session_state.pop('quick_action',None)
+if legacy_action:
+    st.session_state.pending_actions.append(legacy_action)
+if prompt and not input_disabled:
+    st.session_state.pending_actions.append({'command':prompt,'version':slot})
+st.session_state.pending_actions = [action for action in st.session_state.pending_actions
+                                     if action['version']==slot and not input_disabled]
+prompt = st.session_state.pending_actions.pop(0)['command'] if st.session_state.pending_actions else None
+
 if prompt:
     model = None
     game['warning'] = ''
@@ -188,7 +191,7 @@ if prompt:
             if is_v2:
                 reply, game['warning'] = v2_turn(game['state'], game['history'], prompt, model, diagnostics=diagnostics)
             else:
-                reply, game['escaped'] = v1_turn(game['history'], prompt, model)
+                reply, game['escaped'] = v1_turn(game['history'], prompt, model, room=game['state']['puzzle'])
         game['history'].extend([{'role': 'user', 'content': prompt}, {'role': 'assistant', 'content': reply}])
     except ModelError as error:
         diagnostics.update(outcome='error', stage='parser', http_status=http_status(error))
@@ -212,6 +215,5 @@ with st.expander('Diagnostic log (no chat text or API keys)'):
         st.rerun()
     if st.session_state.diagnostic_events:
         st.json(st.session_state.diagnostic_events[-5:])
-st.divider()
-st.caption('Built with Python, Streamlit and Gemini. Offline mode uses authored responses; AI mode requires your own API key.')
-st.caption('Privacy & API use: Your key is held only in this session’s memory. This app does not save it to cookies, browser storage, files or a database, and does not share it with other players. Refreshing starts a new session without a key; Clear API key stops further requests with it. In AI mode, your messages and key are sent over HTTPS to Google to process the request. Google’s data terms, quota limits and any billing on your account apply. Do not enter sensitive personal information. Game progress is temporary and can reset when the session ends. Diagnostic logs contain technical results, timing and error codes only. They exclude keys, chat, action types, selected objects, clues, inventory and puzzle progress. When automatic saving is configured, this metadata is saved to the public GitHub repository. Browser password managers are controlled by your browser, not this app.')
+
+render_privacy('Privacy & API use: Your key is held only in this session’s memory. This app does not save it to cookies, browser storage, files or a database, and does not share it with other players. Refreshing starts a new session without a key; Clear API key stops further requests with it. In AI mode, your messages and key are sent over HTTPS to Google to process the request. Google’s data terms, quota limits and any billing on your account apply. Do not enter sensitive personal information. Game progress is temporary and can reset when the session ends. Diagnostic logs contain technical results, timing and error codes only. They exclude keys, chat, action types, selected objects, clues, inventory and puzzle progress. When automatic saving is configured, this metadata is saved to the public GitHub repository. Browser password managers are controlled by your browser, not this app.')

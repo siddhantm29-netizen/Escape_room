@@ -13,7 +13,7 @@ class AppTests(unittest.TestCase):
         app = AppTest.from_file(APP).run()
         self.assertFalse(app.exception)
         for command in ['examine desk', 'solve desk book', 'take key', 'open drawer',
-                        'examine drawer', 'examine bookshelf', 'examine painting', 'unlock door 8426']:
+                        'examine drawer', 'examine bookshelf', 'examine painting', 'unlock door ' + app.session_state['games']['v2']['state']['puzzle']['door_code']]:
             app.chat_input[0].set_value(command).run()
             self.assertFalse(app.exception)
         self.assertTrue(app.session_state['games']['v2']['state']['escaped'])
@@ -148,22 +148,22 @@ class AppTests(unittest.TestCase):
             self.assertEqual(app.session_state['pending_github_logs'], [])
 
     def test_notebook_displays_earned_clues_and_clears_on_restart(self):
-        from escape_room.engine import ROOM
         app = AppTest.from_file(APP).run()
+        room = app.session_state['games']['v2']['state']['puzzle']
         self.assertEqual(app.metric[0].value, '0/4')
         app.chat_input[0].set_value('desk').run()
         app.chat_input[0].set_value('painting').run()
         self.assertFalse(app.exception)
         notebook = next(e for e in app.expander if e.label == 'Clue notebook')
         text = ' '.join(m.value for m in notebook.markdown)
-        self.assertIn(ROOM['clues']['desk']['text'], text)
-        self.assertIn(ROOM['clues']['painting']['text'], text)
-        self.assertNotIn(ROOM['clues']['drawer']['text'], text)
+        self.assertIn(room['clues']['desk']['text'], text)
+        self.assertIn(room['clues']['painting']['text'], text)
+        self.assertNotIn(room['clues']['drawer']['text'], text)
         self.assertEqual(app.metric[0].value, '2/4')
         app.sidebar.button(key='restart_game').click().run()
         notebook = next(e for e in app.expander if e.label == 'Clue notebook')
         text = ' '.join(m.value for m in notebook.markdown)
-        self.assertNotIn(ROOM['clues']['desk']['text'], text)
+        self.assertNotIn(room['clues']['desk']['text'], text)
         self.assertEqual(app.metric[0].value, '0/4')
 
     def test_legacy_gameplay_log_fields_are_removed_on_rerun(self):
@@ -181,3 +181,16 @@ class AppTests(unittest.TestCase):
         app.chat_input[0].set_value('desk').run()
         app.chat_input[0].set_value('book').run()
         self.assertTrue(app.session_state['games']['v2']['state']['key_available'])
+
+    def test_puzzle_is_stable_during_play_and_regenerated_on_restart(self):
+        app = AppTest.from_file(APP).run()
+        puzzle = app.session_state['games']['v2']['state']['puzzle']
+        app.chat_input[0].set_value('desk').run()
+        self.assertEqual(app.session_state['games']['v2']['state']['puzzle'], puzzle)
+        with patch('escape_room.engine.secrets.SystemRandom') as random:
+            random.return_value.sample.return_value = list('9031')
+            app.sidebar.button(key='restart_game').click().run()
+        fresh = app.session_state['games']['v2']['state']
+        self.assertEqual(fresh['puzzle']['door_code'], '1039')
+        self.assertEqual(fresh['discovered'], [])
+        self.assertNotIn('door_code', str(app.session_state['diagnostic_events']))

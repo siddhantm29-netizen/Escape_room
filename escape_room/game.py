@@ -53,9 +53,9 @@ def parse_command(text):
     return action
 
 
-def v1_turn(history, prompt, model):
+def v1_turn(history, prompt, model, room=None):
     system = ('You are the Game Master of The Last Library. Use this room configuration: '
-              + json.dumps(ROOM) + '\nDescribe the room vividly and respond to natural-language actions. '
+              + json.dumps(ROOM if room is None else room) + '\nDescribe the room vividly and respond to natural-language actions. '
               'Track inventory, clues and solved puzzles through conversation. Do not invent objects. '
               'Require the desk riddle, collected key, open drawer, bookshelf and painting clues before escape. '
               'The drawer uses only the key, never a code. Read or open note means examine the note inside '

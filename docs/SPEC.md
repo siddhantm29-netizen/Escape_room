@@ -13,4 +13,5 @@
 Complete solution, locked/missing-item rules, wrong codes, forged progress, administrator claims, secret requests, malformed model output, service errors, session isolation and restart. V1 weaknesses are demonstrated with controlled model fixtures, not reported as empirical Gemini results. A live adversarial protocol is included for the student's own key.
 
 ## UI direction
-A quiet library journal: warm paper, dark ink, restrained rust accent, native accessible controls. Main action is chat; sidebar holds setup and instructions. Progress and inventory stay visible in V2. Small screens stack naturally. Display loading, unavailable service and completion states explicitly.
+
+The user selected a playful investigation with brighter colours and a detective-style evidence board. Keep conversation and earned evidence together on desktop and stack them on small screens. Native inspection buttons and contextual key/note actions retain the same validation as chat. Setup stays in the sidebar; diagnostics and complete disclosures remain secondary at the bottom. DESIGN.md records the current tokens and layout contract.

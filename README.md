@@ -30,6 +30,12 @@ Deploy this repository on [Streamlit Community Cloud](https://share.streamlit.io
 
 The **Game checks** GitHub Actions workflow tests each push and pull request. Community Cloud handles deployment separately after you connect the repository. No hosted app has been created by these local checks.
 
+## Investigation workspace
+
+The interface uses a playful evidence-board layout: conversation and object inspection on one side, earned clue notes on the other. On phones and tablets, the workspace stacks vertically. It uses Streamlit and responsive CSS, not Bootstrap. Quick controls use the same rules as typed actions; the notebook never supplies undiscovered clues or assembles their solution.
+
+See the [design contract](DESIGN.md), [redesign verification](docs/REDESIGN.md), and [phone preview](docs/screenshots/phone.png). The design guidance combines [avoid-ai-design](https://github.com/funboy322/avoid-ai-design) and [Hallmark](https://github.com/nutlope/hallmark).
+
 ## Compare the versions
 
 | | Version 1 | Version 2 |
@@ -88,7 +94,7 @@ See the [deployment-readiness audit](docs/AUDIT.md) for reproduced bugs, privacy
 python -m unittest discover -s tests -v
 ```
 
-79 tests cover the full solution, invalid actions, inventory, repeated actions, parser/narrator failures, API transport, restart and version isolation. Streamlit AppTest runs without a browser or API key. The app was also opened in a browser and an object examination was verified visually.
+86 tests cover the full solution, invalid actions, inventory, repeated actions, parser/narrator failures, API transport, restart and version isolation. Streamlit AppTest runs without a browser or API key. The app was also opened in a browser and an object examination was verified visually.
 
 **Evidence limit:** API transport tests use mocked HTTP responses. V1 limitation tests use controlled model-output fixtures. They demonstrate that V1 accepts bad model behavior while V2 rejects invalid transitions; they are not evidence that Gemini produced those outputs. The user confirmed a successful live connection check with their own key after the model update. Full live gameplay and adversarial trials are pending. Run the manual protocol in `docs/TEST_CASES.md` before presenting live AI results.
 
@@ -129,3 +135,5 @@ No hosted deployment or remote push is performed by the app. No database, paid A
 - [Gemini pricing and free-tier eligibility](https://ai.google.dev/gemini-api/docs/pricing)
 - [Streamlit chat input](https://docs.streamlit.io/develop/api-reference/chat/st.chat_input)
 - [Streamlit AppTest](https://docs.streamlit.io/develop/api-reference/app-testing/st.testing.v1.apptest)
+
+Refreshing the page or restarting creates a new session puzzle with randomized clue digits and a matching door code. Ordinary actions and layout reruns preserve the current puzzle. Each version keeps its own puzzle; codes and clues are excluded from diagnostics. The checked-in room JSON is a reproducible template, not the live session solution.

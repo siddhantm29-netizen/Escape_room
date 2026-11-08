@@ -54,3 +54,7 @@ Open/read/examine note now maps to examining the existing drawer contents. It ca
 ## Inspection synonyms
 
 Known-object inspection now supports check, inspect, search, read and look at/in/inside, with optional articles and polite prefixes, case-insensitive matching and normalized whitespace. Recognized inspection commands use Python validation in both modes. Unknown objects and multiple-action strings remain rejected. The full suite now contains 79 passing tests.
+
+## Responsive investigation redesign
+
+The app now uses the user-selected playful evidence-board direction, with a side-by-side investigation workspace on desktop and a stacked layout on small screens. All prior game and privacy behavior is retained. Browser verification found and fixed a rapid-action ordering bug; pending actions are now processed in order instead of discarding a quick action when chat arrives immediately. The full suite contains 83 passing tests. Detailed viewport, focus, contrast, source-scan and browser-flow evidence is in REDESIGN.md.

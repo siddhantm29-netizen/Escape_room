@@ -1,13 +1,25 @@
 """Only this module may change Version 2 game state."""
 import json
+import copy
+import re
+import secrets
 from pathlib import Path
 
 ROOM = json.loads(Path(__file__).with_name('room.json').read_text())
 KINDS = {'look', 'examine', 'solve', 'take', 'open', 'use', 'unlock', 'inventory', 'hint', 'unknown'}
 
 
-def new_state():
-    return {'room': ROOM['title'], 'objects': list(ROOM['objects']), 'inventory': [],
+def new_state(randomize=False):
+    # The app opts into session puzzles; the fixed template supports reproducible demos.
+    puzzle = copy.deepcopy(ROOM)
+    if randomize:
+        digits = secrets.SystemRandom().sample('0123456789', 4)
+        for clue, digit in zip(puzzle['clues'].values(), digits):
+            clue['text'] = re.sub(r'\b' + clue['number'] + r'\b', digit, clue['text'])
+            clue['number'] = digit
+        values = {c['symbol']: c['number'] for c in puzzle['clues'].values()}
+        puzzle['door_code'] = ''.join(values[symbol] for symbol in puzzle['order'])
+    return {'puzzle': puzzle, 'room': ROOM['title'], 'objects': list(ROOM['objects']), 'inventory': [],
             'discovered': [], 'solved': [], 'key_available': False,
             'drawer_open': False, 'door_open': False, 'escaped': False}
 
@@ -19,13 +31,14 @@ def public_state(state):
 
 def collected_clues(state):
     """Reproduce only earned evidence, without assembling its solution order."""
+    room = state.get('puzzle', ROOM)
     notes = []
     for target in state['discovered']:
-        if target not in ROOM['clues'] or (target == 'drawer' and not state['drawer_open']):
+        if target not in room['clues'] or (target == 'drawer' and not state['drawer_open']):
             continue
-        text = ROOM['clues'][target]['text']
+        text = room['clues'][target]['text']
         if target == 'desk':
-            text = ROOM['riddle'] + '\n\n' + text
+            text = room['riddle'] + '\n\n' + text
         notes.append({'object': target, 'text': text})
     return notes
 
@@ -36,6 +49,7 @@ def result(ok, text):
 
 
 def apply_action(state, action):
+    room = state.get('puzzle', ROOM)
     if (not isinstance(action, dict) or set(action) != {'kind', 'target', 'value'}
             or any(not isinstance(v, str) or len(v) > 200 for v in action.values())
             or action['kind'] not in KINDS):
@@ -46,7 +60,7 @@ def apply_action(state, action):
     if state['escaped']:
         return result(True, 'You have already escaped. Restart to play again.')
     if kind == 'look':
-        return result(True, ROOM['intro'])
+        return result(True, room['intro'])
     if kind == 'inventory':
         return result(True, 'You carry: ' + (', '.join(state['inventory']) or 'nothing yet') + '.')
     if kind == 'hint':
@@ -67,7 +81,7 @@ def apply_action(state, action):
         return result(True, text)
     if kind == 'unknown':
         return result(False, 'Please describe one action, such as examine drawer, open drawer, inventory or hint.')
-    if target not in ROOM['objects'] + ['key']:
+    if target not in room['objects'] + ['key']:
         return result(False, 'That object is not available. Explore the desk, bookshelf, painting, drawer or door.')
     if kind == 'examine':
         if target == 'drawer' and not state['drawer_open']:
@@ -77,24 +91,24 @@ def apply_action(state, action):
         if target not in state['discovered']:
             state['discovered'].append(target)
         if target == 'desk':
-            return result(True, 'A plaque on the desk asks: ' + ROOM['riddle'] + ' ' + ROOM['clues']['desk']['text'])
+            return result(True, 'A plaque on the desk asks: ' + room['riddle'] + ' ' + room['clues']['desk']['text'])
         if target == 'bookshelf':
             if 'numbers' not in state['solved']:
                 state['solved'].append('numbers')
-            return result(True, ROOM['clues']['bookshelf']['text'])
+            return result(True, room['clues']['bookshelf']['text'])
         if target == 'painting':
-            return result(True, ROOM['clues']['painting']['text'])
+            return result(True, room['clues']['painting']['text'])
         if target == 'drawer':
             if 'order' not in state['solved']:
                 state['solved'].append('order')
-            return result(True, ROOM['clues']['drawer']['text'])
+            return result(True, room['clues']['drawer']['text'])
         if target == 'key':
             return result(True, 'A small brass key fits the drawer lock.')
         return result(True, 'The exit keypad needs four digits. Gather the clues before attempting to escape.')
     if kind == 'solve' and target == 'desk':
         if 'desk' not in state['discovered']:
             return result(False, 'Examine the desk before answering its riddle.')
-        if value.rstrip('.!') not in ROOM['riddle_answers']:
+        if value.rstrip('.!') not in room['riddle_answers']:
             return result(False, 'The desk compartment stays closed. That answer does not fit the riddle.')
         if 'riddle' not in state['solved']:
             state['solved'].append('riddle')
@@ -114,7 +128,7 @@ def apply_action(state, action):
         state['drawer_open'] = True
         return result(True, 'Your brass key opens the drawer. Read the note inside with "read note" or "examine drawer".')
     if kind in {'unlock', 'open'} and target == 'door':
-        if value != ROOM['door_code']:
+        if value != room['door_code']:
             return result(False, 'The keypad rejects the combination. The exit remains locked.')
         if (set(state['solved']) != {'riddle', 'order', 'numbers'}
                 or 'painting' not in state['discovered'] or not state['drawer_open']
