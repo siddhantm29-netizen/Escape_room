@@ -1,6 +1,6 @@
 # Implementation scope
 
-- Python 3.9+, Streamlit chat UI, Gemini REST API. No paid service required.
+- Python 3.11+, Streamlit chat UI, Gemini REST API. No paid service required.
 - One library: desk, bookshelf, painting, drawer, exit door.
 - Puzzle chain: desk riddle -> collect brass key -> open drawer -> read ordering clue; bookshelf numbers + painting order -> four-digit exit code. Python requires all three discoveries and the key/drawer chain before escape in V2.
 - V1: full room configuration and conversation sent to an LLM Game Master; the model's escape marker completes the game. Intentionally retain this baseline for comparison.

@@ -6,7 +6,7 @@ A Python escape-room game built in two versions for the AI Escape Room mini-proj
 
 ## Run locally
 
-Requires Python 3.9 or newer (tested locally on Python 3.9).
+Requires Python 3.11 or newer. The current dependencies and full suite are verified on Python 3.12; choose Python 3.12 for cloud hosting.
 
 ```sh
 git clone https://github.com/siddhantm29-netizen/Escape_room.git
@@ -22,7 +22,13 @@ The default **Version 2 offline demo** works without a key. Use the exact comman
 
 The default model is `gemini-3.5-flash-lite`. Google lists standard text generation for this model on its [free tier](https://ai.google.dev/gemini-api/docs/pricing). Availability and quotas depend on your account; use a free-tier project without paid billing for this assignment. The application never switches to a different model or purchases capacity automatically. An enabled billing account can still incur provider charges: the app cannot enforce Google's billing settings.
 
-Optionally set `GEMINI_API_KEY` and `GEMINI_MODEL` in your environment instead. `.env.example` documents the names; `.env` files are not automatically loaded. Do not put personal or sensitive information into the chat: live play sends it to Google. Keys stay in session memory and are transmitted only as an API header to Google's fixed HTTPS endpoint.
+Optionally set `GEMINI_MODEL` in your environment to change the model default. API keys must be supplied per visitor in the sidebar; environment or cloud-secret keys are deliberately ignored. `.env` files are not automatically loaded. Do not put personal or sensitive information into the chat: live play sends it to Google. Keys stay in session memory and are transmitted only as an API header to Google's fixed HTTPS endpoint. The app does not write keys to cookies or browser storage. Refresh starts a new session without a key; **Clear API key** clears it while preserving game progress. Disconnected sessions may be retained briefly by Streamlit for cleanup, and browser password managers are controlled outside the app.
+
+## Host the app
+
+Deploy this repository on [Streamlit Community Cloud](https://share.streamlit.io/): repository `siddhantm29-netizen/Escape_room`, branch `main`, entry file `app.py`, Python `3.12`. GitHub Pages cannot run the Python application. See the [deployment and workflow guide](docs/DEPLOYMENT.md) for exact steps and key handling.
+
+The **Game checks** GitHub Actions workflow tests each push and pull request. Community Cloud handles deployment separately after you connect the repository. No hosted app has been created by these local checks.
 
 ## Compare the versions
 
@@ -36,6 +42,8 @@ Optionally set `GEMINI_API_KEY` and `GEMINI_MODEL` in your environment instead. 
 | Escape recognition | Model's `[[ESCAPED]]` marker | All prerequisites and correct code checked in Python |
 | Narration | Open-ended generated prose | LLM selects one of two approved descriptions |
 | Bad model response | Can affect the story/completion | Rejected or replaced by a verified description |
+
+Version 1 uses temperature `0.2`; Version 2 uses temperature `0.0` for both action parsing and narration. Both use a 1,024-output-token limit and a 25-second request timeout. Lower temperature reduces variation; Python validation provides correctness checks.
 
 Version 2 uses constrained narration deliberately. The LLM chooses the wording of a validated outcome instead of writing unrestricted prose. This prevents invented objects and unsolicited spoilers, at the cost of narrative variety. The parser still handles natural-language actions in live mode. No model response is executed as code or applied as a state patch.
 
@@ -74,11 +82,13 @@ flowchart TD
 
 ## Verification
 
+See the [deployment-readiness audit](docs/AUDIT.md) for reproduced bugs, privacy changes and current verification limits.
+
 ```sh
 python -m unittest discover -s tests -v
 ```
 
-25 tests cover the full solution, invalid actions, inventory, repeated actions, parser/narrator failures, API transport, restart and version isolation. Streamlit AppTest runs without a browser or API key. The app was also opened in a browser and an object examination was verified visually.
+38 tests cover the full solution, invalid actions, inventory, repeated actions, parser/narrator failures, API transport, restart and version isolation. Streamlit AppTest runs without a browser or API key. The app was also opened in a browser and an object examination was verified visually.
 
 **Evidence limit:** API transport tests use mocked HTTP responses. V1 limitation tests use controlled model-output fixtures. They demonstrate that V1 accepts bad model behavior while V2 rejects invalid transitions; they are not evidence that Gemini produced those outputs. The user confirmed a successful live connection check with their own key after the model update. Full live gameplay and adversarial trials are pending. Run the manual protocol in `docs/TEST_CASES.md` before presenting live AI results.
 
