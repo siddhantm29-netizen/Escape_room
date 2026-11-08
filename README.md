@@ -1,6 +1,6 @@
 # The Last Library · AI Escape Room
 
-A Python escape-room game built in two versions for the AI Escape Room mini-project. Investigate a locked library, solve its desk riddle, collect a brass key and combine scattered clues to escape. One digit is hidden on each of the desk, bookshelf, painting and drawer; separate ordering clues determine the sequence. Hints never supply digits or assemble the final code.
+A Python escape-room game built in two versions for the AI Escape Room mini-project. Investigate a locked library, solve its desk riddle, collect a brass key and combine scattered clues to escape. One digit is hidden on each of the desk, bookshelf, painting and drawer; separate ordering clues determine the sequence. Hints never supply digits or assemble the final code. Version 2 keeps earned clue text in an open-by-default **Clue notebook**, grouped by the object where it was found. The counter tracks four clue fragments; undiscovered clues remain hidden and restarting clears the notebook.
 
 ![The Last Library interface](docs/screenshot.png)
 
@@ -88,7 +88,7 @@ See the [deployment-readiness audit](docs/AUDIT.md) for reproduced bugs, privacy
 python -m unittest discover -s tests -v
 ```
 
-60 tests cover the full solution, invalid actions, inventory, repeated actions, parser/narrator failures, API transport, restart and version isolation. Streamlit AppTest runs without a browser or API key. The app was also opened in a browser and an object examination was verified visually.
+64 tests cover the full solution, invalid actions, inventory, repeated actions, parser/narrator failures, API transport, restart and version isolation. Streamlit AppTest runs without a browser or API key. The app was also opened in a browser and an object examination was verified visually.
 
 **Evidence limit:** API transport tests use mocked HTTP responses. V1 limitation tests use controlled model-output fixtures. They demonstrate that V1 accepts bad model behavior while V2 rejects invalid transitions; they are not evidence that Gemini produced those outputs. The user confirmed a successful live connection check with their own key after the model update. Full live gameplay and adversarial trials are pending. Run the manual protocol in `docs/TEST_CASES.md` before presenting live AI results.
 

@@ -38,3 +38,7 @@ The later puzzle revision distributes digits across the desk, bookshelf, paintin
 ## Object shorthand and diagnostics
 
 Bare known object names now mean examine in Version 2, in both AI and offline modes. Unknown actions receive action guidance instead of a misleading nonexistent-object message. The diagnostics module records bounded metadata without keys or chat; optional GitHub uploads use a separate log branch and retain pending events on failure. Strict export validation rejects arbitrary fields and values. The full suite now contains 60 passing tests, including mocked GitHub upload, branch creation, conflict recovery, upload failure/retry and privacy checks. Actual token-based GitHub upload awaits administrator configuration.
+
+## Clue notebook
+
+Version 2 now displays the complete text of earned clues in discovery order, with the source object and desk riddle retained for reference. The drawer fragment requires opening and examination. The progress metric counts four fragments rather than three puzzle milestones. Restart clears notes, repeat examinations do not duplicate them, and no final order/code is assembled. The full suite now contains 64 passing tests, including notebook UI rendering, hidden clues and restart.

@@ -146,3 +146,22 @@ class AppTests(unittest.TestCase):
             app.button(key='retry_log_upload').click().run()
             self.assertFalse(app.exception)
             self.assertEqual(app.session_state['pending_github_logs'], [])
+
+    def test_notebook_displays_earned_clues_and_clears_on_restart(self):
+        from escape_room.engine import ROOM
+        app = AppTest.from_file(APP).run()
+        self.assertEqual(app.metric[0].value, '0/4')
+        app.chat_input[0].set_value('desk').run()
+        app.chat_input[0].set_value('painting').run()
+        self.assertFalse(app.exception)
+        notebook = next(e for e in app.expander if e.label == 'Clue notebook')
+        text = ' '.join(m.value for m in notebook.markdown)
+        self.assertIn(ROOM['clues']['desk']['text'], text)
+        self.assertIn(ROOM['clues']['painting']['text'], text)
+        self.assertNotIn(ROOM['clues']['drawer']['text'], text)
+        self.assertEqual(app.metric[0].value, '2/4')
+        app.sidebar.button(key='restart_game').click().run()
+        notebook = next(e for e in app.expander if e.label == 'Clue notebook')
+        text = ' '.join(m.value for m in notebook.markdown)
+        self.assertNotIn(ROOM['clues']['desk']['text'], text)
+        self.assertEqual(app.metric[0].value, '0/4')

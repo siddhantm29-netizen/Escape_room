@@ -17,6 +17,19 @@ def public_state(state):
                                  'solved', 'drawer_open', 'door_open', 'escaped')}
 
 
+def collected_clues(state):
+    """Reproduce only earned evidence, without assembling its solution order."""
+    notes = []
+    for target in state['discovered']:
+        if target not in ROOM['clues'] or (target == 'drawer' and not state['drawer_open']):
+            continue
+        text = ROOM['clues'][target]['text']
+        if target == 'desk':
+            text = ROOM['riddle'] + '\n\n' + text
+        notes.append({'object': target, 'text': text})
+    return notes
+
+
 def result(ok, text):
     # Both variants carry the same validated facts. The model can choose tone only.
     return {'ok': ok, 'options': [text, 'In the quiet library, you pause. ' + text]}

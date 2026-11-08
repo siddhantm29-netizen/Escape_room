@@ -4,7 +4,7 @@ import json
 from time import perf_counter
 from uuid import uuid4
 import streamlit as st
-from escape_room.engine import ROOM, new_state, public_state
+from escape_room.engine import ROOM, new_state, public_state, collected_clues
 from escape_room.game import v1_turn, v2_turn
 from escape_room.llm import Gemini, ModelError, DEFAULT_MODEL
 from escape_room.diagnostics import record_event as record_metadata, http_status
@@ -133,13 +133,21 @@ st.caption(f'{version}  •  ' + ('Gemini · live API' if live else 'Offline dem
 
 if is_v2:
     state = game['state']
+    notes = collected_clues(state)
     a, b, c = st.columns(3)
-    a.metric('Clues recorded', f'{len(state["solved"])}/3')
+    a.metric('Clues recorded', f'{len(notes)}/{len(ROOM["clues"])}')
     b.metric('Inventory', 'Brass key' if 'key' in state['inventory'] else 'Empty')
     c.metric('Exit', 'Open' if state['escaped'] else 'Locked')
-    st.progress(len(state['solved']) / 3, text='Record discoveries and compare the markings scattered around the room.')
-    with st.expander('Your discoveries'):
-        st.write(', '.join(state['discovered']) or 'Nothing examined yet.')
+    st.progress(len(notes) / len(ROOM['clues']), text='Record discoveries and compare the markings scattered around the room.')
+    with st.expander('Clue notebook', expanded=True):
+        st.caption('Clues are saved here as you examine objects, in discovery order. Compare them to work out the sequence.')
+        if not notes:
+            st.info('No clues collected yet. Examine the objects around you.')
+        for note in notes:
+            with st.container(border=True):
+                st.markdown('**' + note['object'].capitalize() + '**')
+                st.write(note['text'])
+
 else:
     st.info('Version 1 lets the AI manage the story and remember progress through chat. Enable Gemini to play this baseline.')
 
