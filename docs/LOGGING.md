@@ -2,7 +2,7 @@
 
 ## What the app records
 
-Each turn, connection check, restart and key-clear action records a UTC timestamp, game version, mode, result, processing stage, processing time and HTTP status. Version 2 also records the validated action kind and canonical object name. It never records API keys, GitHub tokens, player chat, model prose, puzzle answers or final codes. Both field names and values are checked before GitHub upload.
+Each turn, connection check, restart and key-clear action records a UTC timestamp, game version, mode, result, processing stage, processing time and HTTP status. It never records action kinds, selected objects, clues, inventory, puzzle progress, API keys, GitHub tokens, player chat, model prose, puzzle answers or final codes. Both field names and values are checked before GitHub upload.
 
 The diagnostic panel at the bottom of the page provides a JSON download, a saved-logs link and a retry control. The latest 200 events remain in the current session's memory. The same metadata is sent to Streamlit server logs for cloud administrators. A disconnected/restarted session can lose unsaved events.
 
@@ -38,7 +38,7 @@ Because the repository is public, saved metadata is public. This is explained in
 
 ## Using logs to improve the game
 
-- A rejected `examine/drawer` action before key collection is expected. An unknown target for the same object suggests a parsing regression.
+- A validation rejection is not necessarily a bug. Selected objects and action details are intentionally omitted; use a separately supplied, non-sensitive reproduction step to investigate.
 - Repeated parser errors suggest response-format or interpretation problems. The log identifies the stage without storing the player's sentence.
 - HTTP 400/401/403 indicates an authentication/access/request problem; 429 indicates quota/rate limiting; 5xx indicates a provider/gateway problem.
 - A narrator fallback means Python already processed the action and displayed its verified result; do not repeat a successful action merely because narration failed.
