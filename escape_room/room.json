@@ -1,10 +1,47 @@
 {
   "title": "The Last Library",
   "intro": "Rain taps against the library windows. You wake beside a desk, with no memory of arriving. A bookshelf, a painting and a locked drawer are nearby. The exit has a four-digit keypad. Explore, collect clues and find your way out.",
-  "objects": ["desk", "bookshelf", "painting", "drawer", "door"],
+  "objects": [
+    "desk",
+    "bookshelf",
+    "painting",
+    "drawer",
+    "door"
+  ],
   "riddle": "I have a spine but no bones, and leaves but no branches. What am I?",
-  "riddle_answers": ["book", "a book", "books"],
-  "book_numbers": {"oak": "7", "moon": "3", "star": "1", "sun": "9"},
-  "order": ["oak", "moon", "star", "sun"],
-  "door_code": "7319"
+  "riddle_answers": [
+    "book",
+    "a book",
+    "books"
+  ],
+  "order": [
+    "oak",
+    "sun",
+    "star",
+    "moon"
+  ],
+  "door_code": "8426",
+  "clues": {
+    "desk": {
+      "symbol": "moon",
+      "number": "6",
+      "text": "Beneath the ink blotter is a crescent marked 6. A marginal line reads: \"The moon follows every other keeper.\""
+    },
+    "bookshelf": {
+      "symbol": "sun",
+      "number": "4",
+      "text": "A loose catalogue card bears a sun stamped 4. On its reverse: \"The sun walks immediately before the star.\""
+    },
+    "painting": {
+      "symbol": "star",
+      "number": "2",
+      "text": "A tiny star in the painted sky carries the numeral 2. The frame is engraved: \"The oak is first to greet the visitor.\""
+    },
+    "drawer": {
+      "symbol": "oak",
+      "number": "8",
+      "text": "Inside rests an oak seal marked 8 beside a torn instruction: \"Each keeper carries a digit. Follow their procession, not the order of your discoveries.\""
+    }
+  },
+  "hint_policy": "Give indirect reasoning nudges only. Never recite the combined symbol order, reconstruct the code, or introduce digits in hints. Show each object's own clue only when that object is examined."
 }

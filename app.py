@@ -43,7 +43,7 @@ with st.sidebar:
     with st.expander('How to play', expanded=True):
         st.write('Explore five objects, solve the desk riddle, collect what you find, and combine the clues to unlock the exit.')
         st.write('With Gemini, describe one action in your own words. For example: “Look closely at the writing desk.”')
-        st.code('look\nexamine desk\nsolve desk YOUR_ANSWER\ntake key\nopen drawer\nexamine drawer\nexamine bookshelf\nexamine painting\nunlock door YOUR_CODE\ninventory\nhint', language=None)
+        st.code('look\nexamine desk\nsolve desk YOUR_ANSWER\ntake key\nopen drawer\nunlock door YOUR_CODE\ninventory\nhint', language=None)
     with st.expander('What changed in Version 2?'):
         st.write('Python owns inventory, locks and puzzle progress. Gemini proposes actions and chooses verified descriptions. Version 1 relies on conversation and the model’s judgment.')
 
@@ -66,7 +66,7 @@ if is_v2:
     a.metric('Clues recorded', f'{len(state["solved"])}/3')
     b.metric('Inventory', 'Brass key' if 'key' in state['inventory'] else 'Empty')
     c.metric('Exit', 'Open' if state['escaped'] else 'Locked')
-    st.progress(len(state['solved']) / 3, text='Desk riddle → drawer note → book numbers; inspect the painting for their order.')
+    st.progress(len(state['solved']) / 3, text='Record discoveries and compare the markings scattered around the room.')
     with st.expander('Your discoveries'):
         st.write(', '.join(state['discovered']) or 'Nothing examined yet.')
 else:

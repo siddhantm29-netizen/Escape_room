@@ -12,7 +12,7 @@ class AppTests(unittest.TestCase):
         app = AppTest.from_file(APP).run()
         self.assertFalse(app.exception)
         for command in ['examine desk', 'solve desk book', 'take key', 'open drawer',
-                        'examine drawer', 'examine bookshelf', 'examine painting', 'unlock door 7319']:
+                        'examine drawer', 'examine bookshelf', 'examine painting', 'unlock door 8426']:
             app.chat_input[0].set_value(command).run()
             self.assertFalse(app.exception)
         self.assertTrue(app.session_state['games']['v2']['state']['escaped'])

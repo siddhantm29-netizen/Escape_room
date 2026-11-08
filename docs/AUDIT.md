@@ -30,3 +30,7 @@ The new Game checks workflow runs installation, dependency compatibility, syntax
 The user's earlier live Gemini connection check succeeded. This audit uses controlled API responses and does not claim a full live-model playthrough or a measured prompt-injection failure rate. No guarantee of zero bugs or zero model misunderstanding is made. Version 1's model-authoritative behavior is an intentional comparison baseline, not equivalent to Version 2 validation.
 
 The original course report records the earlier implementation milestone. This audit and the current README record the latest test count, dependency versions and deployment setup.
+
+## Puzzle revision
+
+The later puzzle revision distributes digits across the desk, bookshelf, painting and locked drawer. Relative-position clues determine their order. Hints no longer provide direct answer cues or assemble the code. The full suite now contains 42 passing tests; the previous code is explicitly rejected.

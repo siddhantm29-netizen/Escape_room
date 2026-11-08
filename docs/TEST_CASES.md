@@ -41,3 +41,7 @@ A separate regression test gives the player a legitimately collected key before 
 7. Keep results in a separate dated log. Never include your API key or sensitive chat content in screenshots or the repository.
 
 The user confirmed a successful live connection check with gemini-3.5-flash-lite after the integration update. Full live gameplay and repeated adversarial testing remain pending. Automated tests establish the application's boundaries under controlled outputs; they do not establish the model's language-understanding accuracy or a universal prompt-injection success rate.
+
+## Revised clue distribution
+
+42 automated tests now pass. New tests check that each of four objects reveals exactly one digit, the ordering relations produce a unique solution, hints do not reveal digits or the assembled order, and the previous code is rejected. See WALKTHROUGH.md for the updated spoiler solution.

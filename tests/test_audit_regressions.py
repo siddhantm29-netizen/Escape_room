@@ -41,15 +41,15 @@ class AuditRegressionTests(unittest.TestCase):
     def test_model_cannot_invent_code_in_open_door_action(self):
         state = ready_state()
         before = deepcopy(state)
-        model = FakeModel('{"kind":"open","target":"door","value":"7319"}', '{"choice":0}')
+        model = FakeModel('{"kind":"open","target":"door","value":"8426"}', '{"choice":0}')
         v2_turn(state, [], 'Open the door.', model)
         self.assertEqual(state, before)
 
     def test_correct_code_must_be_a_whole_value_in_message(self):
         for kind in ('open', 'unlock'):
             state = ready_state()
-            model = FakeModel(json.dumps({'kind':kind,'target':'door','value':'7319'}), '{"choice":0}')
-            v2_turn(state, [], 'Try the code 173190.', model)
+            model = FakeModel(json.dumps({'kind':kind,'target':'door','value':'8426'}), '{"choice":0}')
+            v2_turn(state, [], 'Try the code 184260.', model)
             self.assertFalse(state['escaped'])
 
     def test_riddle_answer_must_be_a_whole_word(self):
@@ -68,6 +68,6 @@ class AuditRegressionTests(unittest.TestCase):
 
     def test_valid_code_with_punctuation_is_accepted(self):
         state = ready_state()
-        model = FakeModel('{"kind":"unlock","target":"door","value":"7319"}', '{"choice":0}')
-        v2_turn(state, [], 'Try "7319", please.', model)
+        model = FakeModel('{"kind":"unlock","target":"door","value":"8426"}', '{"choice":0}')
+        v2_turn(state, [], 'Try "8426", please.', model)
         self.assertTrue(state['escaped'])

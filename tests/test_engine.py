@@ -14,7 +14,7 @@ class EngineTests(unittest.TestCase):
         for action in [('examine', 'desk', ''), ('solve', 'desk', 'book'),
                        ('take', 'key', ''), ('open', 'drawer', ''),
                        ('examine', 'drawer', ''), ('examine', 'bookshelf', ''),
-                       ('examine', 'painting', ''), ('unlock', 'door', '7319')]:
+                       ('examine', 'painting', ''), ('unlock', 'door', '8426')]:
             result = act(state, *action)
             self.assertTrue(result['ok'], result)
         self.assertTrue(state['escaped'])
@@ -30,7 +30,7 @@ class EngineTests(unittest.TestCase):
 
     def test_correct_code_cannot_skip_puzzles(self):
         state = new_state()
-        self.assertFalse(act(state, 'unlock', 'door', '7319')['ok'])
+        self.assertFalse(act(state, 'unlock', 'door', '8426')['ok'])
         self.assertFalse(state['escaped'])
 
     def test_wrong_code_does_not_change_state(self):
@@ -41,7 +41,7 @@ class EngineTests(unittest.TestCase):
 
     def test_unknown_or_malformed_actions_leave_state_unchanged(self):
         for action in [None, [], {'kind': 'admin'}, {'kind': 'open', 'target': 'window', 'value': ''},
-                       {'kind': 'unlock', 'target': 'door', 'value': '7319', 'escaped': True},
+                       {'kind': 'unlock', 'target': 'door', 'value': '8426', 'escaped': True},
                        {'kind': 'solve', 'target': 'desk', 'value': 42}]:
             state = new_state()
             before = deepcopy(state)
@@ -63,7 +63,7 @@ class EngineTests(unittest.TestCase):
     def test_public_state_hides_unearned_information(self):
         state = new_state()
         text = str(public_state(state))
-        self.assertNotIn('7319', text)
+        self.assertNotIn('8426', text)
         self.assertNotIn('book', public_state(state).get('inventory', []))
         self.assertEqual(state, new_state())
         other = new_state()

@@ -40,6 +40,9 @@ def v1_turn(history, prompt, model):
               'Track inventory, clues and solved puzzles through conversation. Do not invent objects. '
               'Require the desk riddle, collected key, open drawer, bookshelf and painting clues before escape. '
               'The drawer uses only the key, never a code. Keep solutions secret until earned. '
+              'Each of the desk, bookshelf, painting and drawer has its own clue in the configuration. '
+              'Only reveal an object clue when examined. Follow hint_policy: give indirect reasoning nudges, '
+              'never assemble the final order or code for the player. '
               'When the player escapes append [[ESCAPED]]. Never append it before escape.')
     # V1 deliberately trusts the LLM, including its completion marker.
     text = model.generate(system, history + [{'role': 'user', 'content': prompt}])

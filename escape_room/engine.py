@@ -36,19 +36,19 @@ def apply_action(state, action):
         return result(True, 'You carry: ' + (', '.join(state['inventory']) or 'nothing yet') + '.')
     if kind == 'hint':
         if 'riddle' not in state['solved']:
-            text = 'Examine the desk. The riddle describes something you might read.'
+            text = 'Some words describe more than one kind of anatomy. Decide which meaning belongs in this room.'
         elif 'key' not in state['inventory']:
-            text = 'Collect the brass key revealed by the desk riddle.'
+            text = 'A solved mechanism may leave something behind. Finding it and carrying it are different actions.'
         elif not state['drawer_open']:
-            text = 'Use your collected key to open the drawer.'
+            text = 'Look for a relationship between what you carry and what remains shut.'
         elif 'order' not in state['solved']:
-            text = 'Examine the open drawer for a note.'
+            text = 'Opening a hiding place is only the beginning; its contents still deserve attention.'
         elif 'numbers' not in state['solved']:
-            text = 'Examine the bookshelf and record the numbers.'
+            text = 'A collector can preserve more than stories.'
         elif 'painting' not in state['discovered']:
-            text = 'Examine the painting to learn the order of the symbols.'
+            text = 'What hangs on the wall may be evidence rather than decoration.'
         else:
-            text = 'Read the book numbers in the order shown in the painting, then unlock the door.'
+            text = 'Separate identity from position. A mark in the room need not occupy the same place in a sequence.'
         return result(True, text)
     if target not in ROOM['objects'] + ['key']:
         return result(False, 'That object is not available. Explore the desk, bookshelf, painting, drawer or door.')
@@ -60,18 +60,17 @@ def apply_action(state, action):
         if target not in state['discovered']:
             state['discovered'].append(target)
         if target == 'desk':
-            return result(True, 'A plaque on the desk asks: ' + ROOM['riddle'])
+            return result(True, 'A plaque on the desk asks: ' + ROOM['riddle'] + ' ' + ROOM['clues']['desk']['text'])
         if target == 'bookshelf':
             if 'numbers' not in state['solved']:
                 state['solved'].append('numbers')
-            return result(True, 'Four book spines show: ' + ', '.join(
-                f'{symbol} = {number}' for symbol, number in ROOM['book_numbers'].items()) + '.')
+            return result(True, ROOM['clues']['bookshelf']['text'])
         if target == 'painting':
-            return result(True, 'The painting shows symbols from left to right: ' + ', '.join(ROOM['order']) + '.')
+            return result(True, ROOM['clues']['painting']['text'])
         if target == 'drawer':
             if 'order' not in state['solved']:
                 state['solved'].append('order')
-            return result(True, 'A note reads: Match each painted symbol to its book number. Read left to right.')
+            return result(True, ROOM['clues']['drawer']['text'])
         if target == 'key':
             return result(True, 'A small brass key fits the drawer lock.')
         return result(True, 'The exit keypad needs four digits. Gather the clues before attempting to escape.')
