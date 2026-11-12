@@ -34,8 +34,7 @@ The **Game checks** GitHub Actions workflow tests each push and pull request. Co
 
 The interface uses a playful evidence-board layout: conversation and object inspection on one side, earned clue notes on the other. On phones and tablets, the workspace stacks vertically. It uses Streamlit and responsive CSS, not Bootstrap. Quick controls use the same rules as typed actions; the notebook never supplies undiscovered clues or assembles their solution.
 
-See the [design contract](DESIGN.md), [redesign verification](docs/REDESIGN.md), and [phone preview](docs/screenshots/phone.png). The design guidance combines [avoid-ai-design](https://github.com/funboy322/avoid-ai-design) and [Hallmark](https://github.com/nutlope/hallmark).
-
+Visit the game :[game](https://escaperoom11.streamlit.app/)
 ## Compare the versions
 
 | | Version 1 | Version 2 |
